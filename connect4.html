@@ -613,7 +613,8 @@
                 piece.className = `piece player${player}`;
                 
                 if (BIRDS.length >= 2) {
-                    const bird = BIRDS[player - 1];
+                    // Use rarest birds (from end of sorted array)
+                    const bird = BIRDS[BIRDS.length - player];
                     const img = document.createElement('img');
                     img.src = bird.imageUrl;
                     img.alt = bird.name;
@@ -687,7 +688,8 @@
 
             updateStatus() {
                 if (BIRDS.length >= 2) {
-                    const bird = BIRDS[this.currentPlayer - 1];
+                    // Use rarest birds (from end of sorted array)
+                    const bird = BIRDS[BIRDS.length - this.currentPlayer];
                     this.statusText.textContent = `${bird.name}'s turn`;
                     this.currentPiece.className = `player-piece player${this.currentPlayer}-piece`;
                     this.playerIndicator.style.display = 'flex';
@@ -698,7 +700,8 @@
 
             showWinner() {
                 if (BIRDS.length >= 2) {
-                    const bird = BIRDS[this.currentPlayer - 1];
+                    // Use rarest birds (from end of sorted array)
+                    const bird = BIRDS[BIRDS.length - this.currentPlayer];
                     this.messageText.textContent = `${bird.name} wins! 🎉`;
                     this.winnerDisplay.innerHTML = `<img src="${bird.imageUrl}" alt="${bird.name}" style="width: 120px; height: 120px; border-radius: 50%; margin: 20px auto; display: block; object-fit: contain;">`;
                 } else {
