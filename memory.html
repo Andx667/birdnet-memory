@@ -164,7 +164,6 @@
 
         .game-board {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(min(120px, 100%), 1fr));
             gap: clamp(8px, 1.2vw, 15px);
             padding: clamp(15px, 2vw, 25px);
             background: white;
@@ -173,6 +172,25 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             flex: 1;
             min-width: 0;
+        }
+
+        /* Grid layouts for different card counts */
+        .game-board[data-cards="12"] { grid-template-columns: repeat(4, 1fr); }
+        .game-board[data-cards="16"] { grid-template-columns: repeat(4, 1fr); }
+        .game-board[data-cards="20"] { grid-template-columns: repeat(5, 1fr); }
+        .game-board[data-cards="24"] { grid-template-columns: repeat(6, 1fr); }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 768px) {
+            .game-board[data-cards="20"] { grid-template-columns: repeat(4, 1fr); }
+            .game-board[data-cards="24"] { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        @media (max-width: 480px) {
+            .game-board[data-cards="12"] { grid-template-columns: repeat(3, 1fr); }
+            .game-board[data-cards="16"] { grid-template-columns: repeat(4, 1fr); }
+            .game-board[data-cards="20"] { grid-template-columns: repeat(4, 1fr); }
+            .game-board[data-cards="24"] { grid-template-columns: repeat(4, 1fr); }
         }
 
         .card {
@@ -750,6 +768,10 @@
                 }
             }
 
+            updateGridLayout() {
+                this.gameBoard.setAttribute('data-cards', this.gridSize);
+            }
+
             initializeElements() {
                 this.gameBoard = document.getElementById('gameBoard');
                 this.movesDisplay = document.getElementById('moves');
@@ -787,6 +809,7 @@
                     return;
                 }
                 
+                this.updateGridLayout();
                 this.resetGame();
                 this.createCards();
                 this.renderBoard();
