@@ -215,66 +215,128 @@
     </div>
 
     <script>
-        // PWA functionality
-        const manifest = {
-            name: "BirdNET Games",
-            short_name: "BirdNET Games",
-            description: "Collection of AI-powered bird-themed games",
-            start_url: "./index.html",
-            display: "standalone",
-            background_color: "#ffffff",
-            theme_color: "#1976d2",
-            orientation: "portrait",
-            icons: [
-                {
-                    src: "https://birdnet.cornell.edu/img/logo-birdnet-circle.png",
-                    sizes: "512x512",
-                    type: "image/png",
-                    purpose: "any maskable"
-                }
-            ]
+        // PWA functionality (single-file)
+        const BRAND = {
+            themeColor: '#1976d2',
+            iconUrl: 'https://birdnet.cornell.edu/img/logo-birdnet-circle.png'
         };
 
-        const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-        const manifestURL = URL.createObjectURL(manifestBlob);
-        document.getElementById('manifest-placeholder').setAttribute('href', manifestURL);
+        function setDynamicManifest(manifestObject) {
+            const manifestBlob = new Blob([JSON.stringify(manifestObject)], { type: 'application/json' });
+            const manifestURL = URL.createObjectURL(manifestBlob);
+            const manifestLink = document.getElementById('manifest-placeholder');
+            if (manifestLink) {
+                manifestLink.setAttribute('href', manifestURL);
+            }
+        }
 
-        // Service Worker
-        if ('serviceWorker' in navigator) {
-            const swCode = `
-                const CACHE_NAME = 'birdnet-games-v1';
-                
-                self.addEventListener('install', (event) => {
-                    self.skipWaiting();
-                });
-                
+        function buildInlineServiceWorkerCode({ cacheName }) {
+            // Note: this is an inline (Blob URL) service worker to keep a single-file structure.
+            return `
+                const CACHE_NAME = '${cacheName}';
+                const ALLOWED_ORIGINS = [self.location.origin, 'https://birdnet.cornell.edu'];
+                const API_PATH = '/api2/requeststats';
+                const BIRD_IMAGE_PREFIX = '/api2/bird/';
+
+                self.addEventListener('install', () => self.skipWaiting());
+
                 self.addEventListener('activate', (event) => {
-                    event.waitUntil(clients.claim());
+                    event.waitUntil((async () => {
+                        // Keep only this cache for this scope.
+                        const keys = await caches.keys();
+                        await Promise.all(keys.map((key) => (key === CACHE_NAME ? Promise.resolve() : caches.delete(key))));
+                        await clients.claim();
+                    })());
                 });
-                
+
+                async function cacheFirst(request) {
+                    const cached = await caches.match(request);
+                    if (cached) return cached;
+                    const response = await fetch(request);
+                    const cache = await caches.open(CACHE_NAME);
+                    cache.put(request, response.clone());
+                    return response;
+                }
+
+                async function networkFirst(request) {
+                    try {
+                        const response = await fetch(request);
+                        const cache = await caches.open(CACHE_NAME);
+                        cache.put(request, response.clone());
+                        return response;
+                    } catch (err) {
+                        const cached = await caches.match(request);
+                        if (cached) return cached;
+                        throw err;
+                    }
+                }
+
+                async function staleWhileRevalidate(request) {
+                    const cached = await caches.match(request);
+                    const fetchPromise = fetch(request).then(async (response) => {
+                        const cache = await caches.open(CACHE_NAME);
+                        cache.put(request, response.clone());
+                        return response;
+                    }).catch(() => null);
+                    return cached || (await fetchPromise);
+                }
+
                 self.addEventListener('fetch', (event) => {
-                    event.respondWith(
-                        caches.match(event.request).then((response) => {
-                            return response || fetch(event.request).then((response) => {
-                                return caches.open(CACHE_NAME).then((cache) => {
-                                    cache.put(event.request, response.clone());
-                                    return response;
-                                });
-                            });
-                        })
-                    );
+                    const request = event.request;
+                    if (request.method !== 'GET') return;
+
+                    const url = new URL(request.url);
+                    if (!ALLOWED_ORIGINS.includes(url.origin)) return;
+
+                    // Network-first for BirdNET stats; cache-first for bird images; SWR for everything else.
+                    if (url.origin === 'https://birdnet.cornell.edu' && url.pathname === API_PATH) {
+                        event.respondWith(networkFirst(request));
+                        return;
+                    }
+
+                    if (url.origin === 'https://birdnet.cornell.edu' && url.pathname.startsWith(BIRD_IMAGE_PREFIX)) {
+                        event.respondWith(cacheFirst(request));
+                        return;
+                    }
+
+                    event.respondWith(staleWhileRevalidate(request));
                 });
             `;
-            
-            const swBlob = new Blob([swCode], { type: 'application/javascript' });
-            const swURL = URL.createObjectURL(swBlob);
-            
-            navigator.serviceWorker.register(swURL).then(() => {
-                console.log('Service Worker registered');
-            }).catch((error) => {
-                console.log('Service Worker registration failed:', error);
-            });
         }
+
+        async function registerInlineServiceWorker({ cacheName, logLabel }) {
+            if (!('serviceWorker' in navigator)) return;
+            try {
+                const swCode = buildInlineServiceWorkerCode({ cacheName });
+                const swBlob = new Blob([swCode], { type: 'application/javascript' });
+                const swURL = URL.createObjectURL(swBlob);
+                await navigator.serviceWorker.register(swURL);
+                console.log(`${logLabel}: Service Worker registered`);
+            } catch (error) {
+                console.log(`${logLabel}: Service Worker registration failed:`, error);
+            }
+        }
+
+        setDynamicManifest({
+            name: 'BirdNET Games',
+            short_name: 'BirdNET Games',
+            description: 'Collection of AI-powered bird-themed games',
+            start_url: './index.html',
+            display: 'standalone',
+            background_color: '#ffffff',
+            theme_color: BRAND.themeColor,
+            orientation: 'portrait',
+            icons: [
+                {
+                    src: BRAND.iconUrl,
+                    sizes: '512x512',
+                    type: 'image/png',
+                    purpose: 'any maskable'
+                }
+            ]
+        });
+
+        registerInlineServiceWorker({ cacheName: 'birdnet-games-v1', logLabel: 'BirdNET Games' });
     </script>
 </body>
 </html>

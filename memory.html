@@ -386,6 +386,18 @@
             text-decoration: underline;
         }
 
+        .footer-line {
+            margin-top: 5px;
+        }
+
+        .footer-status {
+            font-size: 0.85em;
+        }
+
+        .footer-source {
+            font-size: 0.8em;
+        }
+
         .install-prompt {
             background: #e3f2fd;
             border: 1px solid #1976d2;
@@ -633,8 +645,8 @@
 
     <footer>
         <p>Match the bird pairs to win! Inspired by <a href="https://birdnet.cornell.edu" target="_blank">BirdNET</a></p>
-        <p style="margin-top: 5px; font-size: 0.85em;" id="dataSource">Loading bird observations...</p>
-        <p style="margin-top: 5px; font-size: 0.8em;">Data source: <a href="https://birdnet.cornell.edu/api2/requeststats" target="_blank">BirdNET API</a></p>
+        <p class="footer-line footer-status" id="dataSource">Loading bird observations...</p>
+        <p class="footer-line footer-source">Data source: <a href="https://birdnet.cornell.edu/api2/requeststats" target="_blank">BirdNET API</a></p>
     </footer>
 
     <script>
@@ -648,10 +660,32 @@
             '🐦', '🐧', '🦩', '🐔', '🐓', '🦤', '🪶', '🦇'
         ];
 
+        const BIRDNET = {
+            apiUrl: 'https://birdnet.cornell.edu/api2/requeststats',
+            iconUrl: 'https://birdnet.cornell.edu/img/logo-birdnet-circle.png',
+            themeColor: '#1976d2'
+        };
+
+        const BIRDNET_DATA_WINDOW_HOURS = 24;
+
+        function setFooterDataSourceText(text) {
+            const sourceElement = document.getElementById('dataSource');
+            if (sourceElement) {
+                sourceElement.textContent = text;
+            }
+        }
+
+        function formatBirdnetLiveData({ totalObservations, uniqueSpecies, hours = BIRDNET_DATA_WINDOW_HOURS }) {
+            const safeHours = Number.isFinite(hours) && hours > 0 ? Math.round(hours) : BIRDNET_DATA_WINDOW_HOURS;
+            const obsText = Number.isFinite(totalObservations) ? totalObservations.toLocaleString() : '0';
+            const speciesText = Number.isFinite(uniqueSpecies) ? uniqueSpecies.toLocaleString() : '0';
+            return `Live data from BirdNET (${obsText} observations, ${speciesText} species in last ${safeHours}h)`;
+        }
+
         // Fetch most common bird observations from BirdNET API
         async function fetchBirdData() {
             try {
-                const response = await fetch('https://birdnet.cornell.edu/api2/requeststats');
+                const response = await fetch(BIRDNET.apiUrl);
                 const data = await response.json();
                 
                 // Extract observations array and count species occurrences
@@ -689,7 +723,7 @@
                     
                     const totalObservations = observations.length;
                     const uniqueSpecies = speciesData.length;
-                    BIRD_DATA_SOURCE = `Live data from BirdNET (${totalObservations.toLocaleString()} observations, ${uniqueSpecies} species in last 24h)`;
+                    BIRD_DATA_SOURCE = formatBirdnetLiveData({ totalObservations, uniqueSpecies, hours: BIRDNET_DATA_WINDOW_HOURS });
                 } else {
                     useFallbackBirds();
                 }
@@ -762,10 +796,7 @@
             }
 
             updateDataSource() {
-                const sourceElement = document.getElementById('dataSource');
-                if (sourceElement) {
-                    sourceElement.textContent = BIRD_DATA_SOURCE;
-                }
+                setFooterDataSourceText(BIRD_DATA_SOURCE);
             }
 
             updateGridLayout() {
@@ -1100,66 +1131,120 @@
         const installPrompt = document.getElementById('installPrompt');
         const installButton = document.getElementById('installButton');
 
-        // Create manifest dynamically
-        const manifest = {
-            name: "BirdNET Memory Game",
-            short_name: "BirdNET Memory",
-            description: "AI-powered memory game - Match bird pairs using BirdNET knowledge",
-            start_url: "./",
-            display: "standalone",
-            background_color: "#ffffff",
-            theme_color: "#1976d2",
-            orientation: "portrait",
-            icons: [
-                {
-                    src: "https://birdnet.cornell.edu/img/logo-birdnet-circle.png",
-                    sizes: "512x512",
-                    type: "image/png",
-                    purpose: "any maskable"
-                }
-            ]
-        };
+        function setDynamicManifest(manifestObject) {
+            const manifestBlob = new Blob([JSON.stringify(manifestObject)], { type: 'application/json' });
+            const manifestURL = URL.createObjectURL(manifestBlob);
+            const manifestLink = document.getElementById('manifest-placeholder');
+            if (manifestLink) {
+                manifestLink.setAttribute('href', manifestURL);
+            }
+        }
 
-        const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-        const manifestURL = URL.createObjectURL(manifestBlob);
-        document.getElementById('manifest-placeholder').setAttribute('href', manifestURL);
+        function buildInlineServiceWorkerCode({ cacheName }) {
+            return `
+                const CACHE_NAME = '${cacheName}';
+                const ALLOWED_ORIGINS = [self.location.origin, 'https://birdnet.cornell.edu'];
+                const API_PATH = '/api2/requeststats';
+                const BIRD_IMAGE_PREFIX = '/api2/bird/';
 
-        // Service Worker
-        if ('serviceWorker' in navigator) {
-            const swCode = `
-                const CACHE_NAME = 'bird-memory-v1';
-                
-                self.addEventListener('install', (event) => {
-                    self.skipWaiting();
-                });
-                
+                self.addEventListener('install', () => self.skipWaiting());
+
                 self.addEventListener('activate', (event) => {
-                    event.waitUntil(clients.claim());
+                    event.waitUntil((async () => {
+                        const keys = await caches.keys();
+                        await Promise.all(keys.map((key) => (key === CACHE_NAME ? Promise.resolve() : caches.delete(key))));
+                        await clients.claim();
+                    })());
                 });
-                
+
+                async function cacheFirst(request) {
+                    const cached = await caches.match(request);
+                    if (cached) return cached;
+                    const response = await fetch(request);
+                    const cache = await caches.open(CACHE_NAME);
+                    cache.put(request, response.clone());
+                    return response;
+                }
+
+                async function networkFirst(request) {
+                    try {
+                        const response = await fetch(request);
+                        const cache = await caches.open(CACHE_NAME);
+                        cache.put(request, response.clone());
+                        return response;
+                    } catch (err) {
+                        const cached = await caches.match(request);
+                        if (cached) return cached;
+                        throw err;
+                    }
+                }
+
+                async function staleWhileRevalidate(request) {
+                    const cached = await caches.match(request);
+                    const fetchPromise = fetch(request).then(async (response) => {
+                        const cache = await caches.open(CACHE_NAME);
+                        cache.put(request, response.clone());
+                        return response;
+                    }).catch(() => null);
+                    return cached || (await fetchPromise);
+                }
+
                 self.addEventListener('fetch', (event) => {
-                    event.respondWith(
-                        caches.match(event.request).then((response) => {
-                            return response || fetch(event.request).then((response) => {
-                                return caches.open(CACHE_NAME).then((cache) => {
-                                    cache.put(event.request, response.clone());
-                                    return response;
-                                });
-                            });
-                        })
-                    );
+                    const request = event.request;
+                    if (request.method !== 'GET') return;
+
+                    const url = new URL(request.url);
+                    if (!ALLOWED_ORIGINS.includes(url.origin)) return;
+
+                    if (url.origin === 'https://birdnet.cornell.edu' && url.pathname === API_PATH) {
+                        event.respondWith(networkFirst(request));
+                        return;
+                    }
+
+                    if (url.origin === 'https://birdnet.cornell.edu' && url.pathname.startsWith(BIRD_IMAGE_PREFIX)) {
+                        event.respondWith(cacheFirst(request));
+                        return;
+                    }
+
+                    event.respondWith(staleWhileRevalidate(request));
                 });
             `;
-            
-            const swBlob = new Blob([swCode], { type: 'application/javascript' });
-            const swURL = URL.createObjectURL(swBlob);
-            
-            navigator.serviceWorker.register(swURL).then(() => {
-                console.log('Service Worker registered');
-            }).catch((error) => {
-                console.log('Service Worker registration failed:', error);
-            });
         }
+
+        async function registerInlineServiceWorker({ cacheName, logLabel }) {
+            if (!('serviceWorker' in navigator)) return;
+            try {
+                const swCode = buildInlineServiceWorkerCode({ cacheName });
+                const swBlob = new Blob([swCode], { type: 'application/javascript' });
+                const swURL = URL.createObjectURL(swBlob);
+                await navigator.serviceWorker.register(swURL);
+                console.log(`${logLabel}: Service Worker registered`);
+            } catch (error) {
+                console.log(`${logLabel}: Service Worker registration failed:`, error);
+            }
+        }
+
+        // Create manifest dynamically
+        setDynamicManifest({
+            name: 'BirdNET Memory Game',
+            short_name: 'BirdNET Memory',
+            description: 'AI-powered memory game - Match bird pairs using BirdNET knowledge',
+            start_url: './',
+            display: 'standalone',
+            background_color: '#ffffff',
+            theme_color: BIRDNET.themeColor,
+            orientation: 'portrait',
+            icons: [
+                {
+                    src: BIRDNET.iconUrl,
+                    sizes: '512x512',
+                    type: 'image/png',
+                    purpose: 'any maskable'
+                }
+            ]
+        });
+
+        registerInlineServiceWorker({ cacheName: 'bird-memory-v1', logLabel: 'BirdNET Memory' });
 
         // Install prompt
         window.addEventListener('beforeinstallprompt', (e) => {
