@@ -630,9 +630,16 @@
             }
 
             generateCard() {
-                // Select 24 random birds from the pool (plus free space in center)
-                const shuffled = [...BIRDS].sort(() => Math.random() - 0.5);
-                this.board = shuffled.slice(0, 24);
+                // Select mix of common and rare birds for balanced gameplay
+                const commonBirds = BIRDS.slice(0, Math.min(50, Math.floor(BIRDS.length * 0.3)));
+                const rareBirds = BIRDS.slice(Math.min(50, Math.floor(BIRDS.length * 0.3)));
+                
+                // Randomly select 18 common and 6 rare birds
+                const selectedCommon = commonBirds.sort(() => Math.random() - 0.5).slice(0, 18);
+                const selectedRare = rareBirds.sort(() => Math.random() - 0.5).slice(0, 6);
+                
+                // Combine and shuffle
+                this.board = [...selectedCommon, ...selectedRare].sort(() => Math.random() - 0.5);
                 
                 // Insert free space at position 12 (center of 5x5 grid)
                 this.board.splice(12, 0, { name: 'FREE', isFree: true });
@@ -732,11 +739,6 @@
                 
                 this.calledBirds.push(bird);
                 this.calledCount.textContent = this.calledBirds.length;
-                
-                // Highlight the called cell
-                const cell = this.bingoBoard.children[index];
-                cell.classList.add('called');
-                setTimeout(() => cell.classList.remove('called'), 600);
                 
                 // Update current call display
                 this.currentCall.innerHTML = `
