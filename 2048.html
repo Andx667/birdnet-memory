@@ -171,6 +171,7 @@
             bottom: clamp(8px, 1.5vw, 15px);
             display: grid;
             grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
             gap: clamp(8px, 1.5vw, 15px);
             pointer-events: none;
         }
@@ -186,7 +187,8 @@
             padding: 5px;
             transition: all 0.15s ease-in-out;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            aspect-ratio: 1;
+            min-width: 0;
+            min-height: 0;
         }
 
         .tile-image {
@@ -614,6 +616,8 @@
             }
 
             move(direction) {
+                if (!this.gameStarted) return;
+                
                 let moved = false;
                 const originalGrid = JSON.parse(JSON.stringify(this.grid));
 
@@ -630,8 +634,13 @@
                         const merged = this.mergeTiles(column);
                         if (direction === 'down') merged.reverse();
 
+                        // Pad with nulls on the correct side
+                        const paddedColumn = direction === 'down' 
+                            ? [...Array(this.gridSize - merged.length).fill(null), ...merged]
+                            : [...merged, ...Array(this.gridSize - merged.length).fill(null)];
+
                         for (let row = 0; row < this.gridSize; row++) {
-                            this.grid[row][col] = merged[row] || null;
+                            this.grid[row][col] = paddedColumn[row];
                         }
                     }
                 } else {
@@ -641,14 +650,31 @@
                         const merged = this.mergeTiles(rowData);
                         if (direction === 'right') merged.reverse();
 
+                        // Pad with nulls on the correct side
+                        const paddedRow = direction === 'right'
+                            ? [...Array(this.gridSize - merged.length).fill(null), ...merged]
+                            : [...merged, ...Array(this.gridSize - merged.length).fill(null)];
+
                         for (let col = 0; col < this.gridSize; col++) {
-                            this.grid[row][col] = merged[col] || null;
+                            this.grid[row][col] = paddedRow[col];
                         }
                     }
                 }
 
-                // Check if grid changed
-                moved = JSON.stringify(originalGrid) !== JSON.stringify(this.grid);
+                // Check if grid changed by comparing positions and levels
+                for (let row = 0; row < this.gridSize && !moved; row++) {
+                    for (let col = 0; col < this.gridSize && !moved; col++) {
+                        const oldTile = originalGrid[row][col];
+                        const newTile = this.grid[row][col];
+                        
+                        // Check if a tile appeared, disappeared, or changed level
+                        if ((oldTile === null) !== (newTile === null)) {
+                            moved = true;
+                        } else if (oldTile !== null && newTile !== null && oldTile.level !== newTile.level) {
+                            moved = true;
+                        }
+                    }
+                }
 
                 if (moved) {
                     this.addRandomTile();
@@ -698,8 +724,16 @@
                 for (let row = 0; row < this.gridSize; row++) {
                     for (let col = 0; col < this.gridSize; col++) {
                         const current = this.grid[row][col];
-                        if (col < this.gridSize - 1 && this.grid[row][col + 1]?.level === current.level) return true;
-                        if (row < this.gridSize - 1 && this.grid[row + 1][col]?.level === current.level) return true;
+                        // Check right neighbor
+                        if (col < this.gridSize - 1 && this.grid[row][col + 1]?.level === current.level) {
+                            // Can only merge if not at max level
+                            if (current.level + 1 < BIRDS.length) return true;
+                        }
+                        // Check bottom neighbor
+                        if (row < this.gridSize - 1 && this.grid[row + 1][col]?.level === current.level) {
+                            // Can only merge if not at max level
+                            if (current.level + 1 < BIRDS.length) return true;
+                        }
                     }
                 }
 
