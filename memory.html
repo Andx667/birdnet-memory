@@ -8,14 +8,9 @@
     <title>BirdNET Memory Game</title>
     
     <link rel="manifest" href="#" id="manifest-placeholder">
+    <link rel="stylesheet" href="common.css">
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
             background: #f5f5f5;
@@ -351,63 +346,6 @@
             to { transform: scale(1); }
         }
 
-        .back-link {
-            display: inline-block;
-            margin-bottom: 15px;
-            color: #1976d2;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: clamp(0.85rem, 1.8vw, 1rem);
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
-        }
-
-        footer {
-            color: #666;
-            text-align: center;
-            padding: clamp(15px, 2vw, 25px);
-            font-size: clamp(0.75rem, 1.8vw, 1.1rem);
-            line-height: 1.6;
-        }
-
-        footer a {
-            color: #1976d2;
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        .footer-line {
-            margin-top: 5px;
-        }
-
-        .footer-status {
-            font-size: 0.85em;
-        }
-
-        .footer-source {
-            font-size: 0.8em;
-        }
-
-        .game-info-box {
-            background: #f8f9fa;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            font-size: 0.85rem;
-            color: #555;
-            line-height: 1.4;
-            text-align: left;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
         #twoPlayerResults p:first-child {
             font-size: 1.5em;
             margin-bottom: 15px;
@@ -417,58 +355,6 @@
             margin-top: 10px;
         }
 
-        .install-prompt {
-            background: #e3f2fd;
-            border: 1px solid #1976d2;
-            color: #333;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            display: none;
-        }
-
-        .install-prompt.show {
-            display: block;
-        }
-
-        .install-prompt button {
-            margin-top: 10px;
-            background: #1976d2;
-            color: white;
-            border-color: #1976d2;
-        }
-
-        .fullscreen-fab {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 56px;
-            height: 56px;
-            background: #1976d2;
-            border: none;
-            border-radius: 50%;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            transition: all 0.3s;
-            z-index: 999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            touch-action: manipulation;
-        }
-
-        .fullscreen-fab:hover {
-            background: #1565c0;
-            transform: scale(1.1);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
-        }
-
-        .fullscreen-fab:active {
-            transform: scale(0.95);
-        }
 
         .loading-message {
             text-align: center;
@@ -706,6 +592,7 @@
         <p class="footer-line">This project is open source on <a href="https://github.com/Andx667/birdnet-games" target="_blank">GitHub</a></p>
     </footer>
 
+    <script src="common.js"></script>
     <script>
         // Bird data will be loaded from BirdNET API
         let BIRDS = [];
@@ -716,28 +603,6 @@
             '🦅', '🦆', '🦉', '🦚', '🦜', '🦢', '🕊️', '🦃',
             '🐦', '🐧', '🦩', '🐔', '🐓', '🦤', '🪶', '🦇'
         ];
-
-        const BIRDNET = {
-            apiUrl: 'https://birdnet.cornell.edu/api2/requeststats',
-            iconUrl: 'https://birdnet.cornell.edu/img/logo-birdnet-circle.png',
-            themeColor: '#1976d2'
-        };
-
-        const BIRDNET_DATA_WINDOW_HOURS = 24;
-
-        function setFooterDataSourceText(text) {
-            const sourceElement = document.getElementById('dataSource');
-            if (sourceElement) {
-                sourceElement.textContent = text;
-            }
-        }
-
-        function formatBirdnetLiveData({ totalObservations, uniqueSpecies, hours = BIRDNET_DATA_WINDOW_HOURS }) {
-            const safeHours = Number.isFinite(hours) && hours > 0 ? Math.round(hours) : BIRDNET_DATA_WINDOW_HOURS;
-            const obsText = Number.isFinite(totalObservations) ? totalObservations.toLocaleString() : '0';
-            const speciesText = Number.isFinite(uniqueSpecies) ? uniqueSpecies.toLocaleString() : '0';
-            return `Live data from BirdNET (${obsText} observations, ${speciesText} species in last ${safeHours}h)`;
-        }
 
         // Fetch most common bird observations from BirdNET API
         async function fetchBirdData() {
@@ -1153,213 +1018,43 @@
                 if (this.gameMode === 'single') {
                     document.getElementById('singlePlayerResults').classList.remove('hidden');
                     document.getElementById('twoPlayerResults').classList.add('hidden');
+                    document.getElementById('victoryTitle').textContent = '🎉 Congratulations! 🎉';
                     document.getElementById('finalMoves').textContent = this.moves;
                     document.getElementById('finalTime').textContent = this.formatTime(this.timer);
                 } else {
-                    // Two-player mode victory
                     document.getElementById('singlePlayerResults').classList.add('hidden');
                     document.getElementById('twoPlayerResults').classList.remove('hidden');
-                    
+                    document.getElementById('victoryTitle').textContent = '🏆 Game Over 🏆';
+
+                    const winnerText = document.getElementById('winnerText');
+                    if (this.player1Score > this.player2Score) {
+                        winnerText.textContent = 'Player 1 wins!';
+                    } else if (this.player2Score > this.player1Score) {
+                        winnerText.textContent = 'Player 2 wins!';
+                    } else {
+                        winnerText.textContent = "It's a tie!";
+                    }
+
                     document.getElementById('finalPlayer1Score').textContent = this.player1Score;
                     document.getElementById('finalPlayer2Score').textContent = this.player2Score;
                     document.getElementById('finalTime2').textContent = this.formatTime(this.timer);
-                    
-                    const winnerText = document.getElementById('winnerText');
-                    if (this.player1Score > this.player2Score) {
-                        winnerText.textContent = '🏆 Player 1 Wins! 🏆';
-                        winnerText.style.color = '#1976d2';
-                    } else if (this.player2Score > this.player1Score) {
-                        winnerText.textContent = '🏆 Player 2 Wins! 🏆';
-                        winnerText.style.color = '#42a5f5';
-                    } else {
-                        winnerText.textContent = '🤝 It\'s a Tie! 🤝';
-                        winnerText.style.color = '#2196f3';
-                    }
-                }
-                
-                setTimeout(() => {
-                    this.victoryModal.classList.add('show');
-                }, 500);
-            }
-        }
-
-        // Fullscreen functionality
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
-        
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log('Error attempting to enable fullscreen:', err);
-                });
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
-            }
-        }
-
-        function updateFullscreenButton() {
-            if (document.fullscreenElement) {
-                fullscreenBtn.textContent = '⛶';
-                fullscreenBtn.title = 'Exit Fullscreen';
-            } else {
-                fullscreenBtn.textContent = '⛶';
-                fullscreenBtn.title = 'Enter Fullscreen';
-            }
-        }
-
-        if (fullscreenBtn) {
-            fullscreenBtn.addEventListener('click', toggleFullscreen);
-            document.addEventListener('fullscreenchange', updateFullscreenButton);
-        }
-
-        // PWA functionality
-        let deferredPrompt;
-        const installPrompt = document.getElementById('installPrompt');
-        const installButton = document.getElementById('installButton');
-
-        function setDynamicManifest(manifestObject) {
-            const manifestBlob = new Blob([JSON.stringify(manifestObject)], { type: 'application/json' });
-            const manifestURL = URL.createObjectURL(manifestBlob);
-            const manifestLink = document.getElementById('manifest-placeholder');
-            if (manifestLink) {
-                manifestLink.setAttribute('href', manifestURL);
-            }
-        }
-
-        function buildInlineServiceWorkerCode({ cacheName }) {
-            return `
-                const CACHE_NAME = '${cacheName}';
-                const ALLOWED_ORIGINS = [self.location.origin, 'https://birdnet.cornell.edu'];
-                const API_PATH = '/api2/requeststats';
-                const BIRD_IMAGE_PREFIX = '/api2/bird/';
-
-                self.addEventListener('install', () => self.skipWaiting());
-
-                self.addEventListener('activate', (event) => {
-                    event.waitUntil((async () => {
-                        const keys = await caches.keys();
-                        await Promise.all(keys.map((key) => (key === CACHE_NAME ? Promise.resolve() : caches.delete(key))));
-                        await clients.claim();
-                    })());
-                });
-
-                async function cacheFirst(request) {
-                    const cached = await caches.match(request);
-                    if (cached) return cached;
-                    const response = await fetch(request);
-                    const cache = await caches.open(CACHE_NAME);
-                    cache.put(request, response.clone());
-                    return response;
                 }
 
-                async function networkFirst(request) {
-                    try {
-                        const response = await fetch(request);
-                        const cache = await caches.open(CACHE_NAME);
-                        cache.put(request, response.clone());
-                        return response;
-                    } catch (err) {
-                        const cached = await caches.match(request);
-                        if (cached) return cached;
-                        throw err;
-                    }
-                }
-
-                async function staleWhileRevalidate(request) {
-                    const cached = await caches.match(request);
-                    const fetchPromise = fetch(request).then(async (response) => {
-                        const cache = await caches.open(CACHE_NAME);
-                        cache.put(request, response.clone());
-                        return response;
-                    }).catch(() => null);
-                    return cached || (await fetchPromise);
-                }
-
-                self.addEventListener('fetch', (event) => {
-                    const request = event.request;
-                    if (request.method !== 'GET') return;
-
-                    const url = new URL(request.url);
-                    if (!ALLOWED_ORIGINS.includes(url.origin)) return;
-
-                    if (url.origin === 'https://birdnet.cornell.edu' && url.pathname === API_PATH) {
-                        event.respondWith(networkFirst(request));
-                        return;
-                    }
-
-                    if (url.origin === 'https://birdnet.cornell.edu' && url.pathname.startsWith(BIRD_IMAGE_PREFIX)) {
-                        event.respondWith(cacheFirst(request));
-                        return;
-                    }
-
-                    event.respondWith(staleWhileRevalidate(request));
-                });
-            `;
-        }
-
-        async function registerInlineServiceWorker({ cacheName, logLabel }) {
-            if (!('serviceWorker' in navigator)) return;
-            try {
-                const swCode = buildInlineServiceWorkerCode({ cacheName });
-                const swBlob = new Blob([swCode], { type: 'application/javascript' });
-                const swURL = URL.createObjectURL(swBlob);
-                await navigator.serviceWorker.register(swURL);
-                console.log(`${logLabel}: Service Worker registered`);
-            } catch (error) {
-                console.log(`${logLabel}: Service Worker registration failed:`, error);
+                this.victoryModal.classList.add('show');
             }
         }
-
-        // Create manifest dynamically
-        setDynamicManifest({
-            name: 'BirdNET Memory Game',
-            short_name: 'BirdNET Memory',
-            description: 'AI-powered memory game - Match bird pairs using BirdNET knowledge',
-            start_url: './',
-            display: 'standalone',
-            background_color: '#ffffff',
-            theme_color: BIRDNET.themeColor,
-            orientation: 'portrait',
-            icons: [
-                {
-                    src: BIRDNET.iconUrl,
-                    sizes: '512x512',
-                    type: 'image/png',
-                    purpose: 'any maskable'
-                }
-            ]
-        });
-
-        registerInlineServiceWorker({ cacheName: 'bird-memory-v1', logLabel: 'BirdNET Memory' });
-
-        // Install prompt
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installPrompt.classList.add('show');
-        });
-
-        installButton.addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            
-            if (outcome === 'accepted') {
-                installPrompt.classList.remove('show');
-            }
-            
-            deferredPrompt = null;
-        });
-
-        window.addEventListener('appinstalled', () => {
-            installPrompt.classList.remove('show');
-            deferredPrompt = null;
-        });
 
         // Initialize game
         const game = new MemoryGame();
+
+        initCommon({
+            name: 'BirdNET Memory Game',
+            shortName: 'Memory Game',
+            description: 'Match bird pairs - BirdNET themed memory game',
+            startUrl: './memory.html',
+            cacheName: 'bird-memory-v1',
+            logLabel: 'BirdNET Memory'
+        });
     </script>
 </body>
 </html>

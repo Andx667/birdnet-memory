@@ -6,16 +6,11 @@
     <meta name="theme-color" content="#1976d2">
     <meta name="description" content="BirdNET Games - Collection of AI-powered bird-themed games">
     <title>BirdNET Games</title>
-    
-    <link rel="manifest" href="#" id="manifest-placeholder">
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
 
+    <link rel="manifest" href="#" id="manifest-placeholder">
+    <link rel="stylesheet" href="common.css">
+
+    <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
             background: #f5f5f5;
@@ -146,23 +141,6 @@
             color: #e65100;
         }
 
-        footer {
-            color: #666;
-            text-align: center;
-            padding: clamp(15px, 2vw, 20px);
-            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
-            line-height: 1.5;
-        }
-
-        footer a {
-            color: #1976d2;
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
         @media (max-width: 768px) {
             .games-grid {
                 grid-template-columns: 1fr;
@@ -233,8 +211,8 @@
 
         <footer>
             <p>
-                Powered by <a href="https://birdnet.cornell.edu" target="_blank">BirdNET</a> from the 
-                <a href="https://www.birds.cornell.edu/home" target="_blank">Cornell Lab of Ornithology</a> 
+                Powered by <a href="https://birdnet.cornell.edu" target="_blank">BirdNET</a> from the
+                <a href="https://www.birds.cornell.edu/home" target="_blank">Cornell Lab of Ornithology</a>
                 and <a href="https://www.tu-chemnitz.de" target="_blank">Chemnitz University of Technology</a>.
                 Data updates every 24 hours.
             </p>
@@ -242,129 +220,16 @@
         </footer>
     </div>
 
+    <script src="common.js"></script>
     <script>
-        // PWA functionality (single-file)
-        const BRAND = {
-            themeColor: '#1976d2',
-            iconUrl: 'https://birdnet.cornell.edu/img/logo-birdnet-circle.png'
-        };
-
-        function setDynamicManifest(manifestObject) {
-            const manifestBlob = new Blob([JSON.stringify(manifestObject)], { type: 'application/json' });
-            const manifestURL = URL.createObjectURL(manifestBlob);
-            const manifestLink = document.getElementById('manifest-placeholder');
-            if (manifestLink) {
-                manifestLink.setAttribute('href', manifestURL);
-            }
-        }
-
-        function buildInlineServiceWorkerCode({ cacheName }) {
-            // Note: this is an inline (Blob URL) service worker to keep a single-file structure.
-            return `
-                const CACHE_NAME = '${cacheName}';
-                const ALLOWED_ORIGINS = [self.location.origin, 'https://birdnet.cornell.edu'];
-                const API_PATH = '/api2/requeststats';
-                const BIRD_IMAGE_PREFIX = '/api2/bird/';
-
-                self.addEventListener('install', () => self.skipWaiting());
-
-                self.addEventListener('activate', (event) => {
-                    event.waitUntil((async () => {
-                        // Keep only this cache for this scope.
-                        const keys = await caches.keys();
-                        await Promise.all(keys.map((key) => (key === CACHE_NAME ? Promise.resolve() : caches.delete(key))));
-                        await clients.claim();
-                    })());
-                });
-
-                async function cacheFirst(request) {
-                    const cached = await caches.match(request);
-                    if (cached) return cached;
-                    const response = await fetch(request);
-                    const cache = await caches.open(CACHE_NAME);
-                    cache.put(request, response.clone());
-                    return response;
-                }
-
-                async function networkFirst(request) {
-                    try {
-                        const response = await fetch(request);
-                        const cache = await caches.open(CACHE_NAME);
-                        cache.put(request, response.clone());
-                        return response;
-                    } catch (err) {
-                        const cached = await caches.match(request);
-                        if (cached) return cached;
-                        throw err;
-                    }
-                }
-
-                async function staleWhileRevalidate(request) {
-                    const cached = await caches.match(request);
-                    const fetchPromise = fetch(request).then(async (response) => {
-                        const cache = await caches.open(CACHE_NAME);
-                        cache.put(request, response.clone());
-                        return response;
-                    }).catch(() => null);
-                    return cached || (await fetchPromise);
-                }
-
-                self.addEventListener('fetch', (event) => {
-                    const request = event.request;
-                    if (request.method !== 'GET') return;
-
-                    const url = new URL(request.url);
-                    if (!ALLOWED_ORIGINS.includes(url.origin)) return;
-
-                    // Network-first for BirdNET stats; cache-first for bird images; SWR for everything else.
-                    if (url.origin === 'https://birdnet.cornell.edu' && url.pathname === API_PATH) {
-                        event.respondWith(networkFirst(request));
-                        return;
-                    }
-
-                    if (url.origin === 'https://birdnet.cornell.edu' && url.pathname.startsWith(BIRD_IMAGE_PREFIX)) {
-                        event.respondWith(cacheFirst(request));
-                        return;
-                    }
-
-                    event.respondWith(staleWhileRevalidate(request));
-                });
-            `;
-        }
-
-        async function registerInlineServiceWorker({ cacheName, logLabel }) {
-            if (!('serviceWorker' in navigator)) return;
-            try {
-                const swCode = buildInlineServiceWorkerCode({ cacheName });
-                const swBlob = new Blob([swCode], { type: 'application/javascript' });
-                const swURL = URL.createObjectURL(swBlob);
-                await navigator.serviceWorker.register(swURL);
-                console.log(`${logLabel}: Service Worker registered`);
-            } catch (error) {
-                console.log(`${logLabel}: Service Worker registration failed:`, error);
-            }
-        }
-
-        setDynamicManifest({
+        initCommon({
             name: 'BirdNET Games',
-            short_name: 'BirdNET Games',
+            shortName: 'BirdNET Games',
             description: 'Collection of AI-powered bird-themed games',
-            start_url: './index.html',
-            display: 'standalone',
-            background_color: '#ffffff',
-            theme_color: BRAND.themeColor,
-            orientation: 'portrait',
-            icons: [
-                {
-                    src: BRAND.iconUrl,
-                    sizes: '512x512',
-                    type: 'image/png',
-                    purpose: 'any maskable'
-                }
-            ]
+            startUrl: './index.html',
+            cacheName: 'birdnet-games-v1',
+            logLabel: 'BirdNET Games'
         });
-
-        registerInlineServiceWorker({ cacheName: 'birdnet-games-v1', logLabel: 'BirdNET Games' });
     </script>
 </body>
 </html>

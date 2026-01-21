@@ -1,0 +1,122 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 15px;
+    color: #1976d2;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: clamp(0.85rem, 1.8vw, 1rem);
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+footer {
+    color: #666;
+    text-align: center;
+    padding: clamp(15px, 2vw, 25px);
+    font-size: clamp(0.75rem, 1.8vw, 1.1rem);
+    line-height: 1.6;
+}
+
+footer a {
+    color: #1976d2;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+.footer-line {
+    margin-top: 5px;
+}
+
+.footer-status {
+    font-size: 0.85em;
+}
+
+.footer-source {
+    font-size: 0.8em;
+}
+
+.game-info-box {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-size: 0.85rem;
+    color: #555;
+    line-height: 1.4;
+    text-align: left;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+    font-size: clamp(1rem, 2vw, 1.2rem);
+}
+
+.install-prompt {
+    background: #e3f2fd;
+    border: 1px solid #1976d2;
+    color: #333;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    display: none;
+}
+
+.install-prompt.show {
+    display: block;
+}
+
+.install-prompt button {
+    margin-top: 10px;
+    background: #1976d2;
+    color: white;
+    border-color: #1976d2;
+}
+
+.fullscreen-fab {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 56px;
+    height: 56px;
+    background: #1976d2;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: all 0.3s;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+}
+
+.fullscreen-fab:hover {
+    background: #1565c0;
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+}
+
+.fullscreen-fab:active {
+    transform: scale(0.95);
+}

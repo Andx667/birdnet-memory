@@ -8,14 +8,9 @@
     <title>BirdNET Connect Four</title>
     
     <link rel="manifest" href="#" id="manifest-placeholder">
+    <link rel="stylesheet" href="common.css">
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
             background: #f5f5f5;
@@ -250,107 +245,8 @@
             margin-top: 20px;
         }
 
-        .loading {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
-            font-size: clamp(1rem, 2vw, 1.2rem);
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-bottom: 15px;
-            color: #1976d2;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: clamp(0.85rem, 1.8vw, 1rem);
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
-        }
-
-        footer {
-            color: #666;
-            text-align: center;
-            padding: clamp(15px, 2vw, 25px);
-            font-size: clamp(0.75rem, 1.8vw, 1.1rem);
-            line-height: 1.6;
-        }
-
-        footer a {
-            color: #1976d2;
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        .footer-line {
-            margin-top: 5px;
-        }
-
-        .footer-status {
-            font-size: 0.85em;
-        }
-
-        .footer-source {
-            font-size: 0.8em;
-        }
-
         .install-prompt {
-            background: #e3f2fd;
-            border: 1px solid #1976d2;
-            color: #333;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            display: none;
             flex: 0 0 100%;
-        }
-
-        .install-prompt.show {
-            display: block;
-        }
-
-        .install-prompt button {
-            margin-top: 10px;
-            background: #1976d2;
-            color: white;
-            border-color: #1976d2;
-        }
-
-        .fullscreen-fab {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 56px;
-            height: 56px;
-            background: #1976d2;
-            border: none;
-            border-radius: 50%;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            transition: all 0.3s;
-            z-index: 999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            touch-action: manipulation;
-        }
-
-        .fullscreen-fab:hover {
-            background: #1565c0;
-            transform: scale(1.1);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
-        }
-
-        .fullscreen-fab:active {
-            transform: scale(0.95);
         }
 
         /* Responsive layout */
@@ -374,21 +270,6 @@
                 gap: 6px;
                 padding: 12px;
             }
-        }
-
-        .game-info-box {
-            background: #f8f9fa;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            font-size: 0.85rem;
-            color: #555;
-            line-height: 1.4;
-            text-align: left;
-        }
-
-        .hidden {
-            display: none !important;
         }
 
         #undoBtn {
@@ -468,28 +349,8 @@
         <p class="footer-line">This project is open source on <a href="https://github.com/Andx667/birdnet-games" target="_blank">GitHub</a></p>
     </footer>
 
+    <script src="common.js"></script>
     <script>
-        const BIRDNET = {
-            apiUrl: 'https://birdnet.cornell.edu/api2/requeststats',
-            iconUrl: 'https://birdnet.cornell.edu/img/logo-birdnet-circle.png',
-            themeColor: '#1976d2'
-        };
-
-        const BIRDNET_DATA_WINDOW_HOURS = 24;
-
-        function setFooterDataSourceText(text) {
-            const sourceElement = document.getElementById('dataSource');
-            if (sourceElement) {
-                sourceElement.textContent = text;
-            }
-        }
-
-        function formatBirdnetLiveData({ totalObservations, uniqueSpecies, hours = BIRDNET_DATA_WINDOW_HOURS }) {
-            const safeHours = Number.isFinite(hours) && hours > 0 ? Math.round(hours) : BIRDNET_DATA_WINDOW_HOURS;
-            const obsText = Number.isFinite(totalObservations) ? totalObservations.toLocaleString() : '0';
-            const speciesText = Number.isFinite(uniqueSpecies) ? uniqueSpecies.toLocaleString() : '0';
-            return `Live data from BirdNET (${obsText} observations, ${speciesText} species in last ${safeHours}h)`;
-        }
 
         let BIRDS = [];
         let BIRD_DATA_SOURCE = 'Loading...';
@@ -706,7 +567,7 @@
                     return alt;
                 }
             }
-            
+
             // Absolute fallback: return a color that's definitely different from color1
             return normalized1 === '#d32f2f' ? '#0d47a1' : '#d32f2f';
         }
@@ -719,7 +580,7 @@
                 this.currentPlayer = 1;
                 this.gameOver = false;
                 this.winningCells = [];
-                this.stateHistory = []; // Store previous states for undo
+                this.stateHistory = [];
                 
                 this.gameBoard = document.getElementById('gameBoard');
                 this.loading = document.getElementById('loading');
@@ -737,14 +598,11 @@
             async init() {
                 const success = await fetchBirdData();
                 if (success && BIRDS.length >= 2) {
-                    // Set player colors based on bird names
                     this.player1Color = getBirdColor(BIRDS[0].name);
                     this.player2Color = getBirdColor(BIRDS[1].name);
                     
-                    // Ensure sufficient contrast between colors
                     this.player2Color = ensureContrast(this.player1Color, this.player2Color);
                     
-                    // Apply colors to CSS
                     this.applyPlayerColors();
                     
                     this.loading.classList.add('hidden');
@@ -757,7 +615,6 @@
             }
 
             applyPlayerColors() {
-                // Create or update dynamic style element
                 let styleEl = document.getElementById('player-colors');
                 if (!styleEl) {
                     styleEl = document.createElement('style');
@@ -784,7 +641,7 @@
             createBoard() {
                 this.board = Array(this.rows).fill(null).map(() => Array(this.cols).fill(0));
                 this.gameBoard.innerHTML = '';
-                this.stateHistory = []; // Clear history on new board
+                this.stateHistory = [];
                 this.updateUndoButton();
                 
                 for (let row = 0; row < this.rows; row++) {
@@ -805,7 +662,6 @@
                 const row = this.getLowestEmptyRow(col);
                 if (row === -1) return;
                 
-                // Save current state for undo
                 this.saveState();
                 
                 this.board[row][col] = this.currentPlayer;
@@ -841,7 +697,6 @@
                 piece.className = `piece player${player}`;
                 
                 if (BIRDS.length >= 2) {
-                    // BIRDS array contains the two rarest birds [0, 1]
                     const bird = BIRDS[player - 1];
                     const img = document.createElement('img');
                     img.src = bird.imageUrl;
@@ -857,10 +712,10 @@
 
             checkWin(row, col) {
                 const directions = [
-                    { dr: 0, dc: 1 },   // horizontal
-                    { dr: 1, dc: 0 },   // vertical
-                    { dr: 1, dc: 1 },   // diagonal \
-                    { dr: 1, dc: -1 }   // diagonal /
+                    { dr: 0, dc: 1 },
+                    { dr: 1, dc: 0 },
+                    { dr: 1, dc: 1 },
+                    { dr: 1, dc: -1 }
                 ];
                 
                 for (const { dr, dc } of directions) {
@@ -878,7 +733,6 @@
                 const player = this.board[row][col];
                 const cells = [[row, col]];
                 
-                // Check forward direction
                 let r = row + dr;
                 let c = col + dc;
                 while (r >= 0 && r < this.rows && c >= 0 && c < this.cols && this.board[r][c] === player) {
@@ -887,7 +741,6 @@
                     c += dc;
                 }
                 
-                // Check backward direction
                 r = row - dr;
                 c = col - dc;
                 while (r >= 0 && r < this.rows && c >= 0 && c < this.cols && this.board[r][c] === player) {
@@ -1018,181 +871,14 @@
         const game = new ConnectFour();
         game.init();
 
-        // Fullscreen functionality
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
-        
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log('Error attempting to enable fullscreen:', err);
-                });
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
-            }
-        }
-
-        function updateFullscreenButton() {
-            if (document.fullscreenElement) {
-                fullscreenBtn.textContent = '⛶';
-                fullscreenBtn.title = 'Exit Fullscreen';
-            } else {
-                fullscreenBtn.textContent = '⛶';
-                fullscreenBtn.title = 'Enter Fullscreen';
-            }
-        }
-
-        if (fullscreenBtn) {
-            fullscreenBtn.addEventListener('click', toggleFullscreen);
-            document.addEventListener('fullscreenchange', updateFullscreenButton);
-        }
-
-        // Install prompt (PWA)
-        let deferredPrompt;
-        const installPrompt = document.getElementById('installPrompt');
-        const installButton = document.getElementById('installButton');
-
-        // PWA functionality (single-file)
-        function setDynamicManifest(manifestObject) {
-            const manifestBlob = new Blob([JSON.stringify(manifestObject)], { type: 'application/json' });
-            const manifestURL = URL.createObjectURL(manifestBlob);
-            const manifestLink = document.getElementById('manifest-placeholder');
-            if (manifestLink) {
-                manifestLink.setAttribute('href', manifestURL);
-            }
-        }
-
-        function buildInlineServiceWorkerCode({ cacheName }) {
-            return `
-                const CACHE_NAME = '${cacheName}';
-                const ALLOWED_ORIGINS = [self.location.origin, 'https://birdnet.cornell.edu'];
-                const API_PATH = '/api2/requeststats';
-                const BIRD_IMAGE_PREFIX = '/api2/bird/';
-
-                self.addEventListener('install', () => self.skipWaiting());
-
-                self.addEventListener('activate', (event) => {
-                    event.waitUntil((async () => {
-                        const keys = await caches.keys();
-                        await Promise.all(keys.map((key) => (key === CACHE_NAME ? Promise.resolve() : caches.delete(key))));
-                        await clients.claim();
-                    })());
-                });
-
-                async function cacheFirst(request) {
-                    const cached = await caches.match(request);
-                    if (cached) return cached;
-                    const response = await fetch(request);
-                    const cache = await caches.open(CACHE_NAME);
-                    cache.put(request, response.clone());
-                    return response;
-                }
-
-                async function networkFirst(request) {
-                    try {
-                        const response = await fetch(request);
-                        const cache = await caches.open(CACHE_NAME);
-                        cache.put(request, response.clone());
-                        return response;
-                    } catch (err) {
-                        const cached = await caches.match(request);
-                        if (cached) return cached;
-                        throw err;
-                    }
-                }
-
-                async function staleWhileRevalidate(request) {
-                    const cached = await caches.match(request);
-                    const fetchPromise = fetch(request).then(async (response) => {
-                        const cache = await caches.open(CACHE_NAME);
-                        cache.put(request, response.clone());
-                        return response;
-                    }).catch(() => null);
-                    return cached || (await fetchPromise);
-                }
-
-                self.addEventListener('fetch', (event) => {
-                    const request = event.request;
-                    if (request.method !== 'GET') return;
-
-                    const url = new URL(request.url);
-                    if (!ALLOWED_ORIGINS.includes(url.origin)) return;
-
-                    if (url.origin === 'https://birdnet.cornell.edu' && url.pathname === API_PATH) {
-                        event.respondWith(networkFirst(request));
-                        return;
-                    }
-
-                    if (url.origin === 'https://birdnet.cornell.edu' && url.pathname.startsWith(BIRD_IMAGE_PREFIX)) {
-                        event.respondWith(cacheFirst(request));
-                        return;
-                    }
-
-                    event.respondWith(staleWhileRevalidate(request));
-                });
-            `;
-        }
-
-        async function registerInlineServiceWorker({ cacheName, logLabel }) {
-            if (!('serviceWorker' in navigator)) return;
-            try {
-                const swCode = buildInlineServiceWorkerCode({ cacheName });
-                const swBlob = new Blob([swCode], { type: 'application/javascript' });
-                const swURL = URL.createObjectURL(swBlob);
-                await navigator.serviceWorker.register(swURL);
-                console.log(`${logLabel}: Service Worker registered`);
-            } catch (error) {
-                console.log(`${logLabel}: Service Worker registration failed:`, error);
-            }
-        }
-
-        setDynamicManifest({
+        initCommon({
             name: 'BirdNET Connect Four',
-            short_name: 'Connect Four',
+            shortName: 'Connect Four',
             description: 'Connect four birds in a row - BirdNET themed game',
-            start_url: './connect4.html',
-            display: 'standalone',
-            background_color: '#ffffff',
-            theme_color: BIRDNET.themeColor,
-            orientation: 'portrait',
-            icons: [
-                {
-                    src: BIRDNET.iconUrl,
-                    sizes: '512x512',
-                    type: 'image/png',
-                    purpose: 'any maskable'
-                }
-            ]
+            startUrl: './connect4.html',
+            cacheName: 'birdnet-connect4-v1',
+            logLabel: 'BirdNET Connect Four'
         });
-
-        registerInlineServiceWorker({ cacheName: 'birdnet-connect4-v1', logLabel: 'BirdNET Connect Four' });
-
-        if (installPrompt && installButton) {
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                installPrompt.classList.add('show');
-            });
-
-            installButton.addEventListener('click', async () => {
-                if (!deferredPrompt) return;
-
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-
-                if (outcome === 'accepted') {
-                    installPrompt.classList.remove('show');
-                }
-
-                deferredPrompt = null;
-            });
-
-            window.addEventListener('appinstalled', () => {
-                installPrompt.classList.remove('show');
-                deferredPrompt = null;
-            });
-        }
     </script>
 </body>
 </html>

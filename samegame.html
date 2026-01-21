@@ -8,14 +8,9 @@
     <title>BirdNET Same Game</title>
     
     <link rel="manifest" href="#" id="manifest-placeholder">
+    <link rel="stylesheet" href="common.css">
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
             background: #f5f5f5;
@@ -313,120 +308,6 @@
             to { transform: scale(1); }
         }
 
-        .back-link {
-            display: inline-block;
-            margin-bottom: 15px;
-            color: #1976d2;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: clamp(0.85rem, 1.8vw, 1rem);
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
-        }
-
-        .fullscreen-fab {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: #1976d2;
-            color: white;
-            border: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            cursor: pointer;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            z-index: 100;
-            padding: 0;
-        }
-
-        .fullscreen-fab:hover {
-            background: #1565c0;
-            transform: scale(1.1);
-        }
-
-        .install-prompt {
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            display: none;
-            flex-direction: column;
-            gap: 10px;
-            max-width: 280px;
-            z-index: 100;
-        }
-
-        .install-prompt.show {
-            display: flex;
-            animation: slideUp 0.3s;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        footer {
-            color: #666;
-            text-align: center;
-            padding: clamp(15px, 2vw, 25px);
-            font-size: clamp(0.75rem, 1.8vw, 1.1rem);
-            line-height: 1.6;
-        }
-
-        footer a {
-            color: #1976d2;
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        .footer-line {
-            margin-top: 5px;
-        }
-
-        .footer-status {
-            font-size: 0.85em;
-        }
-
-        .footer-source {
-            font-size: 0.8em;
-        }
-
-        .game-info-box {
-            background: #f8f9fa;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            font-size: 0.85rem;
-            color: #555;
-            line-height: 1.4;
-            text-align: left;
-        }
-
-        .hidden {
-            display: none !important;
-        }
 
         .install-prompt p:first-child {
             margin: 0;
@@ -484,13 +365,11 @@
     </style>
 </head>
 <body>
-    <div class="install-prompt" id="installPrompt">
-        <p>Install BirdNET Same Game</p>
-        <p>Add to your home screen for quick access!</p>
-        <button id="installButton">Install</button>
-    </div>
-
     <div class="container">
+        <div class="install-prompt" id="installPrompt">
+            <p>📱 Install this app for the best experience!</p>
+            <button id="installButton">Install App</button>
+        </div>
         <header>
             <a href="index.html" class="back-link">← Back to Games</a>
             <h1>
@@ -562,6 +441,7 @@
         <p class="footer-line">This project is open source on <a href="https://github.com/Andx667/birdnet-games" target="_blank">GitHub</a></p>
     </footer>
 
+    <script src="common.js"></script>
     <script>
         // Fallback bird emojis if API fails
         const FALLBACK_BIRDS = [
@@ -578,15 +458,6 @@
         }));
         let BIRD_DATA_SOURCE = 'Loading...';
 
-        const BIRDNET = {
-            apiUrl: 'https://birdnet.cornell.edu/api2/requeststats',
-            iconUrl: 'https://birdnet.cornell.edu/img/logo-birdnet-circle.png',
-            themeColor: '#1976d2'
-        };
-
-        const BIRDNET_DATA_WINDOW_HOURS = 24;
-
-        // Color palette for the game
         const COLORS = [
             '#e91e63', // Pink
             '#2196f3', // Blue
@@ -596,30 +467,15 @@
             '#f44336', // Red
         ];
 
-        function setFooterDataSourceText(text) {
-            const sourceElement = document.getElementById('dataSource');
-            if (sourceElement) {
-                sourceElement.textContent = text;
-            }
-        }
-
-        function formatBirdnetLiveData({ totalObservations, uniqueSpecies, hours = BIRDNET_DATA_WINDOW_HOURS }) {
-            const safeHours = Number.isFinite(hours) && hours > 0 ? Math.round(hours) : BIRDNET_DATA_WINDOW_HOURS;
-            const obsText = Number.isFinite(totalObservations) ? totalObservations.toLocaleString() : '0';
-            const speciesText = Number.isFinite(uniqueSpecies) ? uniqueSpecies.toLocaleString() : '0';
-            return `Live data from BirdNET (${obsText} observations, ${speciesText} species in last ${safeHours}h)`;
-        }
-
         // Fetch most common bird observations from BirdNET API
         async function fetchBirdData() {
             try {
                 const response = await fetch(BIRDNET.apiUrl);
                 const data = await response.json();
-                
-                // Extract observations array and count species occurrences
+
                 const observations = data.observations || [];
                 const speciesMap = {};
-                
+
                 observations.forEach(obs => {
                     const species = obs.species;
                     if (species) {
@@ -634,41 +490,35 @@
                         speciesMap[commonName].count++;
                     }
                 });
-                
-                // Sort by count (most common first)
+
                 const speciesData = Object.values(speciesMap)
                     .sort((a, b) => b.count - a.count);
-                
+
                 if (speciesData.length > 0) {
-                    // Select birds across the rarity spectrum for better gameplay variety
-                    // Take some common birds and some rarer ones
                     const selectedBirds = [];
                     const totalSpecies = speciesData.length;
-                    
-                    // Strategy: pick birds at different percentiles
-                    // This ensures we get common, uncommon, and rare birds
+
                     const indices = [
-                        0,  // Most common
-                        Math.floor(totalSpecies * 0.1), // Top 10%
-                        Math.floor(totalSpecies * 0.2), // Top 20%
-                        Math.floor(totalSpecies * 0.3), // Top 30%
-                        Math.floor(totalSpecies * 0.4), // Top 40%
-                        Math.floor(totalSpecies * 0.5), // Median
-                        Math.floor(totalSpecies * 0.6), // Top 60%
-                        Math.floor(totalSpecies * 0.7), // Top 70%
-                        Math.floor(totalSpecies * 0.8), // Top 80%
-                        Math.floor(totalSpecies * 0.85), // Top 85%
-                        Math.floor(totalSpecies * 0.9), // Top 90%
-                        Math.floor(totalSpecies * 0.93), // Top 93%
-                        Math.floor(totalSpecies * 0.95), // Top 95%
-                        Math.floor(totalSpecies * 0.97), // Top 97%
-                        Math.floor(totalSpecies * 0.98), // Top 98%
-                        Math.floor(totalSpecies * 0.99)  // Top 99%
+                        0,
+                        Math.floor(totalSpecies * 0.1),
+                        Math.floor(totalSpecies * 0.2),
+                        Math.floor(totalSpecies * 0.3),
+                        Math.floor(totalSpecies * 0.4),
+                        Math.floor(totalSpecies * 0.5),
+                        Math.floor(totalSpecies * 0.6),
+                        Math.floor(totalSpecies * 0.7),
+                        Math.floor(totalSpecies * 0.8),
+                        Math.floor(totalSpecies * 0.85),
+                        Math.floor(totalSpecies * 0.9),
+                        Math.floor(totalSpecies * 0.93),
+                        Math.floor(totalSpecies * 0.95),
+                        Math.floor(totalSpecies * 0.97),
+                        Math.floor(totalSpecies * 0.98),
+                        Math.floor(totalSpecies * 0.99)
                     ];
-                    
-                    // Remove duplicates and take first 16
+
                     const uniqueIndices = [...new Set(indices)].slice(0, 16);
-                    
+
                     BIRDS = uniqueIndices.map(idx => {
                         const species = speciesData[Math.min(idx, totalSpecies - 1)];
                         return {
@@ -679,7 +529,7 @@
                             useImage: true
                         };
                     });
-                    
+
                     const totalObservations = observations.length;
                     const uniqueSpecies = speciesData.length;
                     BIRD_DATA_SOURCE = formatBirdnetLiveData({ totalObservations, uniqueSpecies, hours: BIRDNET_DATA_WINDOW_HOURS });
@@ -693,12 +543,10 @@
         }
 
         function useFallbackBirds() {
-            // Already initialized with fallback, just update the source text
             BIRD_DATA_SOURCE = 'Using fallback data';
         }
 
         function getBirdEmoji(speciesName) {
-            // Map common bird names to emojis
             const name = speciesName.toLowerCase();
             if (name.includes('owl')) return '🦉';
             if (name.includes('duck')) return '🦆';
@@ -714,33 +562,24 @@
             if (name.includes('peacock')) return '🦚';
             if (name.includes('dodo')) return '🦤';
             if (name.includes('crow') || name.includes('raven') || name.includes('blackbird')) return '🐦‍⬛';
-            // Default bird emoji
             return '🐦';
         }
 
-        // Helper function for weighted random selection based on bird rarity
         function getWeightedBirdIndex(colorCount) {
-            // Get birds for the selected color count
             const availableBirds = BIRDS.slice(0, colorCount);
-            
-            // If using fallback birds (no counts), use uniform distribution
+
             const hasRealCounts = availableBirds.some(b => b.count > 0);
             if (!hasRealCounts) {
                 return Math.floor(Math.random() * colorCount);
             }
-            
-            // Apply logarithmic scaling to prevent extreme rarity
-            // This ensures rare birds still appear, just less frequently
+
             const weights = availableBirds.map(bird => {
-                // Use log scale to compress the range: log(count + 1) + minimum weight
                 const logWeight = Math.log(bird.count + 1) + 1;
                 return logWeight;
             });
-            
-            // Calculate total weight
+
             const totalWeight = weights.reduce((sum, w) => sum + w, 0);
-            
-            // Random selection based on weights
+
             let random = Math.random() * totalWeight;
             for (let i = 0; i < weights.length; i++) {
                 random -= weights[i];
@@ -748,8 +587,7 @@
                     return i;
                 }
             }
-            
-            // Fallback (should rarely happen)
+
             return colorCount - 1;
         }
 
@@ -1294,179 +1132,13 @@
             }
         }
 
-        // Fullscreen functionality
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
-        
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log('Error attempting to enable fullscreen:', err);
-                });
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
-            }
-        }
-
-        function updateFullscreenButton() {
-            if (document.fullscreenElement) {
-                fullscreenBtn.textContent = '⛶';
-                fullscreenBtn.title = 'Exit Fullscreen';
-            } else {
-                fullscreenBtn.textContent = '⛶';
-                fullscreenBtn.title = 'Enter Fullscreen';
-            }
-        }
-
-        if (fullscreenBtn) {
-            fullscreenBtn.addEventListener('click', toggleFullscreen);
-            document.addEventListener('fullscreenchange', updateFullscreenButton);
-        }
-
-        // PWA functionality
-        let deferredPrompt;
-        const installPrompt = document.getElementById('installPrompt');
-        const installButton = document.getElementById('installButton');
-
-        function setDynamicManifest(manifestObject) {
-            const manifestBlob = new Blob([JSON.stringify(manifestObject)], { type: 'application/json' });
-            const manifestURL = URL.createObjectURL(manifestBlob);
-            const manifestLink = document.getElementById('manifest-placeholder');
-            if (manifestLink) {
-                manifestLink.setAttribute('href', manifestURL);
-            }
-        }
-
-        function buildInlineServiceWorkerCode({ cacheName }) {
-            return `
-                const CACHE_NAME = '${cacheName}';
-                const ALLOWED_ORIGINS = [self.location.origin, 'https://birdnet.cornell.edu'];
-                const API_PATH = '/api2/requeststats';
-                const BIRD_IMAGE_PREFIX = '/api2/bird/';
-
-                self.addEventListener('install', () => self.skipWaiting());
-
-                self.addEventListener('activate', (event) => {
-                    event.waitUntil((async () => {
-                        const keys = await caches.keys();
-                        await Promise.all(keys.map((key) => (key === CACHE_NAME ? Promise.resolve() : caches.delete(key))));
-                        await clients.claim();
-                    })());
-                });
-
-                async function cacheFirst(request) {
-                    const cached = await caches.match(request);
-                    if (cached) return cached;
-                    const response = await fetch(request);
-                    const cache = await caches.open(CACHE_NAME);
-                    cache.put(request, response.clone());
-                    return response;
-                }
-
-                async function networkFirst(request) {
-                    try {
-                        const response = await fetch(request);
-                        const cache = await caches.open(CACHE_NAME);
-                        cache.put(request, response.clone());
-                        return response;
-                    } catch (err) {
-                        const cached = await caches.match(request);
-                        if (cached) return cached;
-                        throw err;
-                    }
-                }
-
-                async function staleWhileRevalidate(request) {
-                    const cached = await caches.match(request);
-                    const fetchPromise = fetch(request).then(async (response) => {
-                        const cache = await caches.open(CACHE_NAME);
-                        cache.put(request, response.clone());
-                        return response;
-                    }).catch(() => null);
-                    return cached || (await fetchPromise);
-                }
-
-                self.addEventListener('fetch', (event) => {
-                    const request = event.request;
-                    if (request.method !== 'GET') return;
-
-                    const url = new URL(request.url);
-                    if (!ALLOWED_ORIGINS.includes(url.origin)) return;
-
-                    if (url.origin === 'https://birdnet.cornell.edu' && url.pathname === API_PATH) {
-                        event.respondWith(networkFirst(request));
-                        return;
-                    }
-
-                    if (url.origin === 'https://birdnet.cornell.edu' && url.pathname.startsWith(BIRD_IMAGE_PREFIX)) {
-                        event.respondWith(cacheFirst(request));
-                        return;
-                    }
-
-                    event.respondWith(staleWhileRevalidate(request));
-                });
-            `;
-        }
-
-        async function registerInlineServiceWorker({ cacheName, logLabel }) {
-            if (!('serviceWorker' in navigator)) return;
-            try {
-                const swCode = buildInlineServiceWorkerCode({ cacheName });
-                const swBlob = new Blob([swCode], { type: 'application/javascript' });
-                const swURL = URL.createObjectURL(swBlob);
-                await navigator.serviceWorker.register(swURL);
-                console.log(`${logLabel}: Service Worker registered`);
-            } catch (error) {
-                console.log(`${logLabel}: Service Worker registration failed:`, error);
-            }
-        }
-
-        // Create manifest dynamically
-        setDynamicManifest({
+        initCommon({
             name: 'BirdNET Same Game',
-            short_name: 'BirdNET Same',
+            shortName: 'Same Game',
             description: 'Remove connected bird groups in this classic puzzle game',
-            start_url: './',
-            display: 'standalone',
-            background_color: '#ffffff',
-            theme_color: BIRDNET.themeColor,
-            orientation: 'portrait',
-            icons: [
-                {
-                    src: BIRDNET.iconUrl,
-                    sizes: '512x512',
-                    type: 'image/png',
-                    purpose: 'any maskable'
-                }
-            ]
-        });
-
-        registerInlineServiceWorker({ cacheName: 'bird-samegame-v1', logLabel: 'BirdNET Same Game' });
-
-        // Install prompt
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installPrompt.classList.add('show');
-        });
-
-        installButton.addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            
-            if (outcome === 'accepted') {
-                installPrompt.classList.remove('show');
-            }
-            
-            deferredPrompt = null;
-        });
-
-        window.addEventListener('appinstalled', () => {
-            installPrompt.classList.remove('show');
-            deferredPrompt = null;
+            startUrl: './samegame.html',
+            cacheName: 'bird-samegame-v1',
+            logLabel: 'BirdNET Same Game'
         });
 
         // Initialize game variable
