@@ -486,15 +486,20 @@
     </footer>
 
     <script>
-        // Bird data will be loaded from BirdNET API
-        let BIRDS = [];
-        let BIRD_DATA_SOURCE = 'Loading...';
-
         // Fallback bird emojis if API fails
         const FALLBACK_BIRDS = [
             '🦅', '🦆', '🦉', '🦚', '🦜', '🦢', '🕊️', '🦃',
             '🐦', '🐧', '🦩', '🐔', '🐓', '🦤', '🪶', '🦇'
         ];
+
+        // Bird data will be loaded from BirdNET API - start with fallback
+        let BIRDS = FALLBACK_BIRDS.map((emoji, index) => ({ 
+            emoji, 
+            name: `Bird ${index + 1}`, 
+            count: 0,
+            useImage: false
+        }));
+        let BIRD_DATA_SOURCE = 'Loading...';
 
         const BIRDNET = {
             apiUrl: 'https://birdnet.cornell.edu/api2/requeststats',
@@ -580,12 +585,7 @@
         }
 
         function useFallbackBirds() {
-            BIRDS = FALLBACK_BIRDS.map((emoji, index) => ({ 
-                emoji, 
-                name: `Bird ${index + 1}`, 
-                count: 0,
-                useImage: false
-            }));
+            // Already initialized with fallback, just update the source text
             BIRD_DATA_SOURCE = 'Using fallback data';
         }
 
@@ -609,11 +609,6 @@
             // Default bird emoji
             return '🐦';
         }
-
-        // Initialize data fetch
-        fetchBirdData().then(() => {
-            setFooterDataSourceText(BIRD_DATA_SOURCE);
-        });
 
         // Game logic
         class SameGame {
@@ -1083,8 +1078,18 @@
             deferredPrompt = null;
         });
 
-        // Initialize game
-        const game = new SameGame();
+        // Initialize game variable
+        let game;
+
+        // Fetch bird data first, then initialize game
+        fetchBirdData().then(() => {
+            setFooterDataSourceText(BIRD_DATA_SOURCE);
+            game = new SameGame();
+        }).catch(() => {
+            // If API fails, still initialize with fallback
+            setFooterDataSourceText(BIRD_DATA_SOURCE);
+            game = new SameGame();
+        });
     </script>
 </body>
 </html>
