@@ -173,9 +173,11 @@
             flex: 1;
             min-width: 0;
             align-self: flex-start;
-            max-height: calc(100vh - 40px);
-            max-width: 100%;
-            overflow: hidden;
+            max-height: calc(100vh - 60px);
+            max-width: min(90vw, 900px);
+            overflow: auto;
+            justify-content: center;
+            align-content: center;
         }
 
         .cell {
@@ -190,10 +192,8 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.15);
             border: 2px solid rgba(255,255,255,0.5);
             touch-action: manipulation;
-            min-width: 30px;
-            min-height: 30px;
-            max-width: 60px;
-            max-height: 60px;
+            width: clamp(30px, 5vw, 55px);
+            height: clamp(30px, 5vw, 55px);
         }
 
         .cell:not(.empty):hover {
@@ -478,6 +478,13 @@
 
             .game-board {
                 width: 100%;
+                max-width: 100%;
+                max-height: calc(100vh - 100px);
+            }
+
+            .cell {
+                width: clamp(25px, 8vw, 50px);
+                height: clamp(25px, 8vw, 50px);
             }
         }
     </style>
