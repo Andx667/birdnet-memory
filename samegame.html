@@ -419,6 +419,53 @@
             font-size: 0.8em;
         }
 
+        .game-info-box {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+            color: #555;
+            line-height: 1.4;
+            text-align: left;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .install-prompt p:first-child {
+            margin: 0;
+            font-weight: 600;
+            color: #1976d2;
+        }
+
+        .install-prompt p:last-of-type {
+            margin: 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        #hintBtn {
+            background: #4caf50;
+            border-color: #4caf50;
+        }
+
+        #hintBtn:hover {
+            background: #388e3c;
+            border-color: #388e3c;
+        }
+
+        #undoBtn {
+            background: #ff9800;
+            border-color: #ff9800;
+        }
+
+        #undoBtn:hover {
+            background: #f57c00;
+            border-color: #f57c00;
+        }
+
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -437,8 +484,8 @@
 </head>
 <body>
     <div class="install-prompt" id="installPrompt">
-        <p style="margin: 0; font-weight: 600; color: #1976d2;">Install BirdNET Same Game</p>
-        <p style="margin: 0; font-size: 0.9em; color: #666;">Add to your home screen for quick access!</p>
+        <p>Install BirdNET Same Game</p>
+        <p>Add to your home screen for quick access!</p>
         <button id="installButton">Install</button>
     </div>
 
@@ -450,6 +497,11 @@
                 Same Game
             </h1>
             <div class="subtitle">Remove connected bird groups!</div>
+            
+            <div class="game-info-box">
+                <strong>How to Play:</strong> Click on groups of 2+ connected birds of the same color. Larger groups score more points!<br>
+                <strong>Birds:</strong> Bird colors are weighted by rarity from live BirdNET data—rarer birds appear less often in the grid.
+            </div>
             
             <div class="controls">
                 <select id="gridSize">
@@ -466,8 +518,8 @@
                     <option value="6">6 Colors</option>
                 </select>
                 
-                <button id="hintBtn" style="background: #4caf50; border-color: #4caf50;">💡 Get Hint</button>
-                <button id="undoBtn" style="background: #ff9800; border-color: #ff9800;">↶ Undo</button>
+                <button id="hintBtn">💡 Get Hint</button>
+                <button id="undoBtn">↶ Undo</button>
                 <button id="newGameBtn">New Game</button>
             </div>
             

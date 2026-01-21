@@ -332,6 +332,10 @@
             font-size: clamp(1rem, 2vw, 1.2rem);
         }
 
+        .hidden {
+            display: none !important;
+        }
+
         .back-link {
             display: inline-block;
             margin-bottom: 15px;
@@ -487,6 +491,11 @@
             </h1>
             <div class="subtitle">Merge birds to discover the rarest species!</div>
             
+            <div class="game-info-box">
+                <strong>How to Play:</strong> Use arrow keys (or swipe on mobile) to slide tiles. When two tiles with the same bird touch, they merge into a rarer bird!<br>
+                <strong>Birds:</strong> Progress from common to rare birds based on live BirdNET observation counts.
+            </div>
+            
             <div class="controls">
                 <div class="score-container">
                     <div class="score-box">
@@ -500,18 +509,12 @@
                 </div>
                 <button id="newGameBtn">New Game</button>
             </div>
-
-            <div class="instructions">
-                <h3>How to Play</h3>
-                <p>Use arrow keys (or swipe on mobile) to move tiles. When two tiles with the same bird species touch, they merge into a rarer bird!</p>
-                <p>Progress from common to rare birds. Can you discover the rarest species?</p>
-            </div>
         </header>
 
         <div class="grid-wrapper">
             <div class="grid-container" id="gridContainer">
                 <div id="loading" class="loading">Loading bird data from BirdNET...</div>
-                <div id="gameBoard" class="game-board" style="display: none;">
+                <div id="gameBoard" class="game-board hidden">
                     <!-- Grid cells -->
                     <div class="grid-cell"></div>
                     <div class="grid-cell"></div>
@@ -692,8 +695,8 @@
                     return;
                 }
                 
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('gameBoard').style.display = 'grid';
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('gameBoard').classList.remove('hidden');
                 
                 this.setupControls();
                 this.restart();
@@ -941,7 +944,7 @@
                             img.src = bird.imageUrl;
                             img.alt = bird.name;
                             img.onerror = function() {
-                                this.style.display = 'none';
+                                this.classList.add('hidden');
                             };
 
                             const name = document.createElement('div');

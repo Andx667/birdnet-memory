@@ -399,6 +399,30 @@
             font-size: 0.8em;
         }
 
+        .game-info-box {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+            color: #555;
+            line-height: 1.4;
+            text-align: left;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #twoPlayerResults p:first-child {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        #twoPlayerResults p:last-child {
+            margin-top: 10px;
+        }
+
         .install-prompt {
             background: #e3f2fd;
             border: 1px solid #1976d2;
@@ -610,6 +634,11 @@
             </h1>
             <div class="subtitle">AI-powered memory training</div>
             
+            <div class="game-info-box">
+                <strong>How to Play:</strong> Flip cards to find matching pairs of birds. Remember their locations!<br>
+                <strong>Birds:</strong> Features real bird species from live BirdNET observation data.
+            </div>
+            
             <div class="controls">
                 <select id="gridSize">
                     <option value="12">Easy (12 cards)</option>
@@ -665,11 +694,11 @@
                 <p>Moves: <strong id="finalMoves">0</strong></p>
                 <p>Time: <strong id="finalTime">0:00</strong></p>
             </div>
-            <div id="twoPlayerResults" style="display: none;">
-                <p id="winnerText" style="font-size: 1.5em; margin-bottom: 15px;"></p>
+            <div id="twoPlayerResults" class="hidden">
+                <p id="winnerText"></p>
                 <p>Player 1: <strong id="finalPlayer1Score">0</strong> pairs</p>
                 <p>Player 2: <strong id="finalPlayer2Score">0</strong> pairs</p>
-                <p style="margin-top: 10px;">Time: <strong id="finalTime2">0:00</strong></p>
+                <p>Time: <strong id="finalTime2">0:00</strong></p>
             </div>
             <button id="playAgainBtn">Play Again</button>
         </div>
@@ -900,10 +929,10 @@
                 
                 // Toggle UI based on game mode
                 if (this.gameMode === 'two') {
-                    this.statsContainer.style.display = 'none';
+                    this.statsContainer.classList.add('hidden');
                     this.playerStats.classList.add('active');
                 } else {
-                    this.statsContainer.style.display = 'flex';
+                    this.statsContainer.classList.remove('hidden');
                     this.playerStats.classList.remove('active');
                 }
                 
@@ -975,7 +1004,7 @@
                         <img src="${birdData.imageUrl}" 
                              alt="${birdName}" 
                              class="bird-image" 
-                             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+                             onerror="this.classList.add('hidden');this.nextElementSibling.classList.remove('hidden');">
                         <div class="emoji-fallback">${fallbackEmoji}</div>
                         <div class="bird-name">${displayName}</div>
                     `;
@@ -1129,14 +1158,14 @@
                 clearInterval(this.timerInterval);
                 
                 if (this.gameMode === 'single') {
-                    document.getElementById('singlePlayerResults').style.display = 'block';
-                    document.getElementById('twoPlayerResults').style.display = 'none';
+                    document.getElementById('singlePlayerResults').classList.remove('hidden');
+                    document.getElementById('twoPlayerResults').classList.add('hidden');
                     document.getElementById('finalMoves').textContent = this.moves;
                     document.getElementById('finalTime').textContent = this.formatTime(this.timer);
                 } else {
                     // Two-player mode victory
-                    document.getElementById('singlePlayerResults').style.display = 'none';
-                    document.getElementById('twoPlayerResults').style.display = 'block';
+                    document.getElementById('singlePlayerResults').classList.add('hidden');
+                    document.getElementById('twoPlayerResults').classList.remove('hidden');
                     
                     document.getElementById('finalPlayer1Score').textContent = this.player1Score;
                     document.getElementById('finalPlayer2Score').textContent = this.player2Score;

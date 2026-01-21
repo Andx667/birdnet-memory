@@ -481,6 +481,21 @@
             font-size: 0.8em;
         }
 
+        .game-info-box {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+            color: #555;
+            line-height: 1.4;
+            text-align: left;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
         .install-prompt {
             background: #e3f2fd;
             border: 1px solid #1976d2;
@@ -583,6 +598,11 @@
             </h1>
             <div class="subtitle">Two-Player Bird Bingo - First to complete a line wins!</div>
             
+            <div class="game-info-box">
+                <strong>How to Play:</strong> Click "Current Bird" to call a bird. Mark it on your board. First to complete a row, column, or diagonal wins!<br>
+                <strong>Birds:</strong> Each game features 48 unique birds from live BirdNET data.
+            </div>
+            
             <div class="game-stats">
                 <div class="stat-box">
                     <div class="stat-label">Birds Called</div>
@@ -601,7 +621,7 @@
 
         <div id="loading" class="loading">Loading bird data from BirdNET...</div>
 
-        <div class="game-area" id="gameArea" style="display: none;">
+        <div class="game-area hidden" id="gameArea">
             <div class="player-section">
                 <div class="player-header player1">
                     <div class="player-name">Player 1</div>
@@ -822,7 +842,7 @@
                         img.className = 'cell-image';
                         img.src = bird.imageUrl;
                         img.alt = bird.name;
-                        img.onerror = () => img.style.display = 'none';
+                        img.onerror = () => img.classList.add('hidden');
                         
                         const name = document.createElement('div');
                         name.className = 'cell-name';
@@ -953,7 +973,7 @@
                 
                 this.currentCall.innerHTML = `
                     <div class="call-label">Current Bird</div>
-                    <img src="${bird.imageUrl}" alt="${bird.name}" class="call-bird-image" onerror="this.style.display='none'">
+                    <img src="${bird.imageUrl}" alt="${bird.name}" class="call-bird-image" onerror="this.classList.add('hidden')">
                     <div class="call-bird-name">${bird.name}</div>
                     <div class="timer-bar-container">
                         <div id="timerBar" class="timer-bar"></div>
