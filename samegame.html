@@ -467,6 +467,7 @@
                 </select>
                 
                 <button id="hintBtn" style="background: #4caf50; border-color: #4caf50;">💡 Get Hint</button>
+                <button id="undoBtn" style="background: #ff9800; border-color: #ff9800;">↶ Undo</button>
                 <button id="newGameBtn">New Game</button>
             </div>
             
@@ -725,6 +726,7 @@
             setupEventListeners() {
                 document.getElementById('newGameBtn').addEventListener('click', () => this.initGame());
                 document.getElementById('hintBtn').addEventListener('click', () => this.showHint());
+                document.getElementById('undoBtn').addEventListener('click', () => this.undoMove());
                 document.getElementById('playAgainBtn').addEventListener('click', () => {
                     this.victoryModal.classList.remove('show');
                     this.initGame();
@@ -747,6 +749,8 @@
                 this.totalCellsCleared = 0;
                 this.grid = [];
                 this.clearHint();
+                this.stateHistory = []; // Store previous states for undo
+                this.updateUndoButton();
                 
                 // Create grid with weighted bird distribution
                 for (let row = 0; row < this.gridSize; row++) {
@@ -766,6 +770,51 @@
                 
                 this.renderBoard();
                 this.updateDisplay();
+            }
+
+            saveState() {
+                // Deep copy current state
+                const state = {
+                    grid: this.grid.map(row => row.map(cell => ({...cell}))),
+                    score: this.score,
+                    moves: this.moves,
+                    totalCellsCleared: this.totalCellsCleared
+                };
+                this.stateHistory.push(state);
+                
+                // Limit history to last 20 moves to save memory
+                if (this.stateHistory.length > 20) {
+                    this.stateHistory.shift();
+                }
+                
+                this.updateUndoButton();
+            }
+
+            undoMove() {
+                if (this.stateHistory.length === 0) {
+                    return; // Nothing to undo
+                }
+                
+                // Restore previous state
+                const previousState = this.stateHistory.pop();
+                this.grid = previousState.grid.map(row => row.map(cell => ({...cell})));
+                this.score = previousState.score;
+                this.moves = previousState.moves;
+                this.totalCellsCleared = previousState.totalCellsCleared;
+                
+                this.clearHint();
+                this.renderBoard();
+                this.updateDisplay();
+                this.updateUndoButton();
+            }
+
+            updateUndoButton() {
+                const undoBtn = document.getElementById('undoBtn');
+                if (undoBtn) {
+                    undoBtn.disabled = this.stateHistory.length === 0;
+                    undoBtn.style.opacity = this.stateHistory.length === 0 ? '0.5' : '1';
+                    undoBtn.style.cursor = this.stateHistory.length === 0 ? 'not-allowed' : 'pointer';
+                }
             }
 
             renderBoard() {
@@ -820,6 +869,9 @@
                 // Need at least 2 connected cells
                 if (group.length < 2) return;
                 
+                // Save current state for undo
+                this.saveState();
+                
                 // Clear any hint and highlight first
                 this.clearHint();
                 this.highlightGroup(row, col, false);
@@ -838,6 +890,7 @@
                     this.applyGravity();
                     this.renderBoard();
                     this.updateDisplay();
+                    this.updateUndoButton();
                     
                     // Check for game over
                     if (this.isGameOver()) {
