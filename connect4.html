@@ -398,6 +398,11 @@
             </h1>
             <div class="subtitle">Four in a row wins!</div>
             
+            <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 0.85rem; color: #555; line-height: 1.4;">
+                <strong>How to Play:</strong> Drop birds into columns to connect four of your color vertically, horizontally, or diagonally.<br>
+                <strong>Birds:</strong> Each game features a random common vs. rare bird from live BirdNET data. Colors match the birds' names!
+            </div>
+            
             <div class="game-status">
                 <div class="status-text" id="statusText">Loading birds...</div>
                 <div class="player-indicator" id="playerIndicator" style="display: none;">
@@ -532,6 +537,9 @@
                 'blue': '#0d47a1',  // Darker blue, distinct from grid (#1976d2)
                 'yellow': '#fbc02d',
                 'green': '#388e3c',
+                'emerald': '#00897b',  // Emerald green
+                'olive': '#689f38',
+                'lime': '#9ccc65',
                 'orange': '#f57c00',
                 'purple': '#7b1fa2',
                 'violet': '#7b1fa2',
@@ -540,6 +548,7 @@
                 'gray': '#616161',
                 'grey': '#616161',
                 'black': '#212121',
+                'coal': '#424242',  // Dark grey
                 'white': '#eeeeee',
                 'golden': '#fbc02d',
                 'gold': '#fbc02d',
@@ -547,7 +556,11 @@
                 'crimson': '#c62828',
                 'indigo': '#283593',  // Darker indigo, distinct from grid
                 'turquoise': '#00897b',
-                'teal': '#00796b'
+                'teal': '#00796b',
+                'rust': '#bf360c',
+                'copper': '#d84315',
+                'silver': '#bdbdbd',
+                'rose': '#e91e63'
             };
             
             // Check for color words in name
@@ -610,7 +623,7 @@
         }
 
         // Adjust color for better contrast
-        function ensureContrast(color1, color2, minContrast = 3.0) {
+        function ensureContrast(color1, color2, minContrast = 4.5) {
             const contrast = getContrastRatio(color1, color2);
             
             if (contrast >= minContrast) {
@@ -632,13 +645,13 @@
             };
             
             // Try darkening first
-            let adjusted = adjustBrightness(color2, -60);
+            let adjusted = adjustBrightness(color2, -80);
             if (getContrastRatio(color1, adjusted) >= minContrast) {
                 return adjusted;
             }
             
             // Try lightening
-            adjusted = adjustBrightness(color2, 60);
+            adjusted = adjustBrightness(color2, 80);
             if (getContrastRatio(color1, adjusted) >= minContrast) {
                 return adjusted;
             }
