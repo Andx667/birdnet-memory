@@ -500,11 +500,13 @@
                 });
                 
                 const speciesData = Object.values(speciesMap)
-                    .sort((a, b) => b.count - a.count)
-                    .slice(0, 2);
+                    .sort((a, b) => b.count - a.count);
                 
-                if (speciesData.length >= 2) {
-                    BIRDS = speciesData.map(species => ({
+                // Take the two least common birds (from end of sorted array)
+                const rarestBirds = speciesData.slice(-2);
+                
+                if (rarestBirds.length >= 2) {
+                    BIRDS = rarestBirds.map(species => ({
                         name: species.name,
                         scientificName: species.scientificName,
                         imageUrl: `https://birdnet.cornell.edu/api2/bird/${encodeURIComponent(species.scientificName)}.webp`,
@@ -613,8 +615,8 @@
                 piece.className = `piece player${player}`;
                 
                 if (BIRDS.length >= 2) {
-                    // Use rarest birds (from end of sorted array)
-                    const bird = BIRDS[BIRDS.length - player];
+                    // BIRDS array contains the two rarest birds [0, 1]
+                    const bird = BIRDS[player - 1];
                     const img = document.createElement('img');
                     img.src = bird.imageUrl;
                     img.alt = bird.name;
@@ -688,8 +690,8 @@
 
             updateStatus() {
                 if (BIRDS.length >= 2) {
-                    // Use rarest birds (from end of sorted array)
-                    const bird = BIRDS[BIRDS.length - this.currentPlayer];
+                    // BIRDS array contains the two rarest birds [0, 1]
+                    const bird = BIRDS[this.currentPlayer - 1];
                     this.statusText.textContent = `${bird.name}'s turn`;
                     this.currentPiece.className = `player-piece player${this.currentPlayer}-piece`;
                     this.playerIndicator.style.display = 'flex';
@@ -700,8 +702,8 @@
 
             showWinner() {
                 if (BIRDS.length >= 2) {
-                    // Use rarest birds (from end of sorted array)
-                    const bird = BIRDS[BIRDS.length - this.currentPlayer];
+                    // BIRDS array contains the two rarest birds [0, 1]
+                    const bird = BIRDS[this.currentPlayer - 1];
                     this.messageText.textContent = `${bird.name} wins! 🎉`;
                     this.winnerDisplay.innerHTML = `<img src="${bird.imageUrl}" alt="${bird.name}" style="width: 120px; height: 120px; border-radius: 50%; margin: 20px auto; display: block; object-fit: contain;">`;
                 } else {
