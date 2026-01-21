@@ -112,14 +112,6 @@
             border: 2px solid #333;
         }
 
-        .player1-piece {
-            background: #e53935;
-        }
-
-        .player2-piece {
-            background: #fdd835;
-        }
-
         button {
             padding: 12px 24px;
             font-size: 1rem;
@@ -205,14 +197,6 @@
             height: 70%;
             object-fit: contain;
             border-radius: 50%;
-        }
-
-        .piece.player1 {
-            background: #e53935;
-        }
-
-        .piece.player2 {
-            background: #fdd835;
         }
 
         .piece.winning {
@@ -529,6 +513,138 @@
             }
         }
 
+        // Extract color from bird name or make educated guess
+        function getBirdColor(birdName) {
+            const name = birdName.toLowerCase();
+            
+            // Color word mapping
+            const colorMap = {
+                'red': '#d32f2f',
+                'blue': '#1976d2',
+                'yellow': '#fbc02d',
+                'green': '#388e3c',
+                'orange': '#f57c00',
+                'purple': '#7b1fa2',
+                'violet': '#7b1fa2',
+                'pink': '#c2185b',
+                'brown': '#5d4037',
+                'gray': '#616161',
+                'grey': '#616161',
+                'black': '#212121',
+                'white': '#eeeeee',
+                'golden': '#fbc02d',
+                'gold': '#fbc02d',
+                'scarlet': '#d32f2f',
+                'crimson': '#c62828',
+                'indigo': '#303f9f',
+                'turquoise': '#00897b',
+                'teal': '#00796b'
+            };
+            
+            // Check for color words in name
+            for (const [colorWord, colorHex] of Object.entries(colorMap)) {
+                if (name.includes(colorWord)) {
+                    return colorHex;
+                }
+            }
+            
+            // Educated guesses based on bird types
+            if (name.includes('cardinal')) return '#d32f2f';
+            if (name.includes('robin')) return '#d84315';
+            if (name.includes('bluebird')) return '#1976d2';
+            if (name.includes('jay')) return '#1e88e5';
+            if (name.includes('goldfinch') || name.includes('canary')) return '#fbc02d';
+            if (name.includes('oriole')) return '#ff6f00';
+            if (name.includes('tanager')) return '#c62828';
+            if (name.includes('bunting')) return '#1976d2';
+            if (name.includes('warbler')) return '#fdd835';
+            if (name.includes('sparrow') || name.includes('wren')) return '#8d6e63';
+            if (name.includes('crow') || name.includes('raven') || name.includes('grackle')) return '#212121';
+            if (name.includes('dove') || name.includes('pigeon')) return '#9e9e9e';
+            if (name.includes('hawk') || name.includes('eagle') || name.includes('falcon')) return '#5d4037';
+            if (name.includes('owl')) return '#6d4c41';
+            if (name.includes('heron') || name.includes('egret')) return '#eeeeee';
+            if (name.includes('duck')) return '#00897b';
+            if (name.includes('goose')) return '#9e9e9e';
+            if (name.includes('swan')) return '#fafafa';
+            if (name.includes('finch')) return '#f57c00';
+            if (name.includes('hummingbird')) return '#00897b';
+            if (name.includes('woodpecker')) return '#d32f2f';
+            if (name.includes('chickadee') || name.includes('titmouse')) return '#757575';
+            if (name.includes('nuthatch')) return '#546e7a';
+            
+            // Default fallback colors
+            return '#1976d2';
+        }
+
+        // Calculate color contrast ratio
+        function getContrastRatio(color1, color2) {
+            const getLuminance = (hex) => {
+                const rgb = parseInt(hex.slice(1), 16);
+                const r = ((rgb >> 16) & 0xff) / 255;
+                const g = ((rgb >> 8) & 0xff) / 255;
+                const b = (rgb & 0xff) / 255;
+                
+                const [rs, gs, bs] = [r, g, b].map(c => {
+                    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+                });
+                
+                return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+            };
+            
+            const lum1 = getLuminance(color1);
+            const lum2 = getLuminance(color2);
+            const lighter = Math.max(lum1, lum2);
+            const darker = Math.min(lum1, lum2);
+            
+            return (lighter + 0.05) / (darker + 0.05);
+        }
+
+        // Adjust color for better contrast
+        function ensureContrast(color1, color2, minContrast = 3.0) {
+            const contrast = getContrastRatio(color1, color2);
+            
+            if (contrast >= minContrast) {
+                return color2;
+            }
+            
+            // If contrast is too low, try to adjust brightness
+            const adjustBrightness = (hex, amount) => {
+                const rgb = parseInt(hex.slice(1), 16);
+                let r = (rgb >> 16) & 0xff;
+                let g = (rgb >> 8) & 0xff;
+                let b = rgb & 0xff;
+                
+                r = Math.max(0, Math.min(255, r + amount));
+                g = Math.max(0, Math.min(255, g + amount));
+                b = Math.max(0, Math.min(255, b + amount));
+                
+                return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+            };
+            
+            // Try darkening first
+            let adjusted = adjustBrightness(color2, -60);
+            if (getContrastRatio(color1, adjusted) >= minContrast) {
+                return adjusted;
+            }
+            
+            // Try lightening
+            adjusted = adjustBrightness(color2, 60);
+            if (getContrastRatio(color1, adjusted) >= minContrast) {
+                return adjusted;
+            }
+            
+            // Last resort: use complementary high-contrast colors
+            const alternates = ['#d32f2f', '#1976d2', '#388e3c', '#f57c00', '#7b1fa2', '#00897b'];
+            for (const alt of alternates) {
+                if (getContrastRatio(color1, alt) >= minContrast) {
+                    return alt;
+                }
+            }
+            
+            return color2; // Give up and return original
+        }
+
         class ConnectFour {
             constructor() {
                 this.rows = 6;
@@ -555,6 +671,16 @@
             async init() {
                 const success = await fetchBirdData();
                 if (success && BIRDS.length >= 2) {
+                    // Set player colors based on bird names
+                    this.player1Color = getBirdColor(BIRDS[0].name);
+                    this.player2Color = getBirdColor(BIRDS[1].name);
+                    
+                    // Ensure sufficient contrast between colors
+                    this.player2Color = ensureContrast(this.player1Color, this.player2Color);
+                    
+                    // Apply colors to CSS
+                    this.applyPlayerColors();
+                    
                     this.loading.style.display = 'none';
                     this.gameBoard.style.display = 'grid';
                     this.createBoard();
@@ -562,6 +688,31 @@
                 } else {
                     this.loading.textContent = 'Failed to load bird data. Please refresh.';
                 }
+            }
+
+            applyPlayerColors() {
+                // Create or update dynamic style element
+                let styleEl = document.getElementById('player-colors');
+                if (!styleEl) {
+                    styleEl = document.createElement('style');
+                    styleEl.id = 'player-colors';
+                    document.head.appendChild(styleEl);
+                }
+                
+                styleEl.textContent = `
+                    .player1-piece {
+                        background: ${this.player1Color} !important;
+                    }
+                    .player2-piece {
+                        background: ${this.player2Color} !important;
+                    }
+                    .piece.player1 {
+                        background: ${this.player1Color} !important;
+                    }
+                    .piece.player2 {
+                        background: ${this.player2Color} !important;
+                    }
+                `;
             }
 
             createBoard() {
