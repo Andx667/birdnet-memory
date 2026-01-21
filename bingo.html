@@ -464,34 +464,6 @@
             <button id="installButton">Install App</button>
         </div>
 
-        <header>
-            <a href="index.html" class="back-link">← Back to Games</a>
-            <h1>
-                <img src="https://birdnet.cornell.edu/img/logo-birdnet-circle.png" alt="BirdNET Logo" class="logo">
-                BirdNET Bingo
-            </h1>
-            
-            <div class="game-info-box">
-                <strong>How to Play:</strong> Click "Current Bird" to call a bird. Mark it on your board. First to complete a row, column, or diagonal wins!<br>
-                <strong>Birds:</strong> Each game features 48 unique birds from live BirdNET data.
-            </div>
-            
-            <div class="game-stats">
-                <div class="stat-box">
-                    <div class="stat-label">Birds Called</div>
-                    <div class="stat-value" id="calledCount">0</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Player 1 Wins</div>
-                    <div class="stat-value" id="player1Wins">0</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Player 2 Wins</div>
-                    <div class="stat-value" id="player2Wins">0</div>
-                </div>
-            </div>
-        </header>
-
         <div id="loading" class="loading">Loading bird data from BirdNET...</div>
 
         <div class="game-area hidden" id="gameArea">
@@ -506,6 +478,33 @@
             </div>
 
             <div class="center-column">
+                <header class="center-panel">
+                    <a href="index.html" class="back-link">← Back to Games</a>
+                    <h1>
+                        <img src="https://birdnet.cornell.edu/img/logo-birdnet-circle.png" alt="BirdNET Logo" class="logo">
+                        BirdNET Bingo
+                    </h1>
+
+                    <div class="game-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Birds Called</div>
+                            <div class="stat-value" id="calledCount">0</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Player 1 Wins</div>
+                            <div class="stat-value" id="player1Wins">0</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Player 2 Wins</div>
+                            <div class="stat-value" id="player2Wins">0</div>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="game-info-box">
+                    <strong>How to Play:</strong> Click "Current Bird" to call a bird. Mark it on your board. First to complete a row, column, or diagonal wins!<br>
+                    <strong>Birds:</strong> Each game features 48 unique birds from live BirdNET data.
+                </div>
                 <div class="current-call-center" id="currentCall">
                     <div class="call-label">Current Bird</div>
                     <div class="call-bird-name">Click here to start</div>

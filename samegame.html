@@ -387,14 +387,12 @@
                     <option value="8">8x8 Grid</option>
                     <option value="10" selected>10x10 Grid</option>
                     <option value="12">12x12 Grid</option>
-                    <option value="15">15x15 Grid</option>
                 </select>
                 
                 <select id="colorCount">
                     <option value="3">3 Colors</option>
                     <option value="4">4 Colors</option>
                     <option value="5" selected>5 Colors</option>
-                    <option value="6">6 Colors</option>
                 </select>
                 
                 <button id="hintBtn">💡 Get Hint</button>
@@ -599,9 +597,11 @@
                 this.victoryModal = document.getElementById('victoryModal');
                 this.gridSizeSelect = document.getElementById('gridSize');
                 this.colorCountSelect = document.getElementById('colorCount');
-                
-                this.gridSize = parseInt(this.gridSizeSelect.value);
-                this.colorCount = parseInt(this.colorCountSelect.value);
+
+                this.gridSize = SameGame.sanitizeGridSize(parseInt(this.gridSizeSelect.value));
+                this.colorCount = SameGame.sanitizeColorCount(parseInt(this.colorCountSelect.value));
+                this.gridSizeSelect.value = String(this.gridSize);
+                this.colorCountSelect.value = String(this.colorCount);
                 this.grid = [];
                 this.score = 0;
                 this.moves = 0;
@@ -621,14 +621,26 @@
                 });
                 
                 this.gridSizeSelect.addEventListener('change', () => {
-                    this.gridSize = parseInt(this.gridSizeSelect.value);
+                    this.gridSize = SameGame.sanitizeGridSize(parseInt(this.gridSizeSelect.value));
+                    this.gridSizeSelect.value = String(this.gridSize);
                     this.initGame();
                 });
                 
                 this.colorCountSelect.addEventListener('change', () => {
-                    this.colorCount = parseInt(this.colorCountSelect.value);
+                    this.colorCount = SameGame.sanitizeColorCount(parseInt(this.colorCountSelect.value));
+                    this.colorCountSelect.value = String(this.colorCount);
                     this.initGame();
                 });
+            }
+
+            static sanitizeGridSize(value) {
+                const allowed = new Set([8, 10, 12]);
+                return allowed.has(value) ? value : 10;
+            }
+
+            static sanitizeColorCount(value) {
+                const allowed = new Set([3, 4, 5]);
+                return allowed.has(value) ? value : 5;
             }
 
             initGame() {
