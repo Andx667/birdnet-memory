@@ -488,11 +488,20 @@
                 const speciesData = Object.values(speciesMap)
                     .sort((a, b) => b.count - a.count);
                 
-                // Take the two least common birds (from end of sorted array)
-                const rarestBirds = speciesData.slice(-2);
+                // Select one common bird (from top 10) and one rare bird (from bottom 10)
+                const poolSize = Math.min(10, speciesData.length);
                 
-                if (rarestBirds.length >= 2) {
-                    BIRDS = rarestBirds.map(species => ({
+                if (speciesData.length >= 2) {
+                    // Get pools
+                    const commonPool = speciesData.slice(0, poolSize); // Most common
+                    const rarePool = speciesData.slice(-poolSize); // Least common
+                    
+                    // Randomly select one from each pool
+                    const commonBird = commonPool[Math.floor(Math.random() * commonPool.length)];
+                    const rareBird = rarePool[Math.floor(Math.random() * rarePool.length)];
+                    
+                    // Player 1 gets common bird, Player 2 gets rare bird
+                    BIRDS = [commonBird, rareBird].map(species => ({
                         name: species.name,
                         scientificName: species.scientificName,
                         imageUrl: `https://birdnet.cornell.edu/api2/bird/${encodeURIComponent(species.scientificName)}.webp`,
@@ -520,7 +529,7 @@
             // Color word mapping
             const colorMap = {
                 'red': '#d32f2f',
-                'blue': '#1976d2',
+                'blue': '#0d47a1',  // Darker blue, distinct from grid (#1976d2)
                 'yellow': '#fbc02d',
                 'green': '#388e3c',
                 'orange': '#f57c00',
@@ -536,7 +545,7 @@
                 'gold': '#fbc02d',
                 'scarlet': '#d32f2f',
                 'crimson': '#c62828',
-                'indigo': '#303f9f',
+                'indigo': '#283593',  // Darker indigo, distinct from grid
                 'turquoise': '#00897b',
                 'teal': '#00796b'
             };
@@ -551,12 +560,12 @@
             // Educated guesses based on bird types
             if (name.includes('cardinal')) return '#d32f2f';
             if (name.includes('robin')) return '#d84315';
-            if (name.includes('bluebird')) return '#1976d2';
-            if (name.includes('jay')) return '#1e88e5';
+            if (name.includes('bluebird')) return '#0d47a1';  // Darker blue
+            if (name.includes('jay')) return '#1565c0';  // Darker blue
             if (name.includes('goldfinch') || name.includes('canary')) return '#fbc02d';
             if (name.includes('oriole')) return '#ff6f00';
             if (name.includes('tanager')) return '#c62828';
-            if (name.includes('bunting')) return '#1976d2';
+            if (name.includes('bunting')) return '#0d47a1';  // Darker blue
             if (name.includes('warbler')) return '#fdd835';
             if (name.includes('sparrow') || name.includes('wren')) return '#8d6e63';
             if (name.includes('crow') || name.includes('raven') || name.includes('grackle')) return '#212121';
@@ -574,7 +583,7 @@
             if (name.includes('nuthatch')) return '#546e7a';
             
             // Default fallback colors
-            return '#1976d2';
+            return '#0d47a1';  // Darker blue as default, distinct from grid
         }
 
         // Calculate color contrast ratio
@@ -635,7 +644,7 @@
             }
             
             // Last resort: use complementary high-contrast colors
-            const alternates = ['#d32f2f', '#1976d2', '#388e3c', '#f57c00', '#7b1fa2', '#00897b'];
+            const alternates = ['#d32f2f', '#0d47a1', '#388e3c', '#f57c00', '#7b1fa2', '#00897b'];  // Using darker blue
             for (const alt of alternates) {
                 if (getContrastRatio(color1, alt) >= minContrast) {
                     return alt;
