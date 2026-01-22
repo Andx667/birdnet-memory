@@ -169,18 +169,6 @@
         .game-board[data-cards="20"] { grid-template-columns: repeat(5, 1fr); }
         .game-board[data-cards="24"] { grid-template-columns: repeat(6, 1fr); }
 
-        /* Responsive adjustments for smaller screens */
-        @media (max-width: 768px) {
-            .game-board[data-cards="20"] { grid-template-columns: repeat(4, 1fr); }
-            .game-board[data-cards="24"] { grid-template-columns: repeat(4, 1fr); }
-        }
-
-        @media (max-width: 480px) {
-            .game-board[data-cards="12"] { grid-template-columns: repeat(3, 1fr); }
-            .game-board[data-cards="16"] { grid-template-columns: repeat(4, 1fr); }
-            .game-board[data-cards="20"] { grid-template-columns: repeat(4, 1fr); }
-            .game-board[data-cards="24"] { grid-template-columns: repeat(4, 1fr); }
-        }
 
         .card {
             aspect-ratio: 1;
@@ -427,76 +415,6 @@
             font-size: 1em;
         }
 
-        /* Additional responsive adjustments for very small screens */
-        @media (max-width: 400px) {
-            body { padding: 8px; }
-            .game-board { padding: 8px; gap: 4px; }
-            .card { min-width: 50px; min-height: 50px; }
-        }
-        
-        /* Revert to vertical layout on medium and smaller screens */
-        @media (max-width: 1024px) {
-            .container {
-                flex-direction: column;
-            }
-            
-            header {
-                width: 100%;
-                position: static;
-            }
-            
-            .controls {
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            
-            .stats {
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            
-            .stat-item {
-                flex-direction: column;
-                min-width: clamp(60px, 15vw, 100px);
-            }
-            
-            .stat-label {
-                margin-bottom: clamp(3px, 0.5vw, 5px);
-            }
-            
-            .player-scores {
-                flex-direction: row;
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-            
-            .player-score {
-                flex-direction: column;
-                min-width: 120px;
-            }
-        }
-        
-        /* Landscape orientation on mobile */
-        @media (max-width: 900px) and (orientation: landscape) {
-            body { padding: 10px; }
-            header { padding: 15px; }
-            .game-board { padding: 10px; }
-            .modal-content { max-height: 85vh; }
-        }
-        
-        /* Large screens optimization */
-        @media (min-width: 1920px) {
-            .container { max-width: 1600px; }
-        }
-        
-        /* Extra large displays (65" and above) */
-        @media (min-width: 2560px) {
-            body { font-size: 20px; }
-            .container { max-width: 2000px; }
-            button, select { min-height: 60px; }
-        }
     </style>
 </head>
 <body>

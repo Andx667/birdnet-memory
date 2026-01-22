@@ -309,6 +309,7 @@
         }
 
 
+
         .install-prompt p:first-child {
             margin: 0;
             font-weight: 600;
@@ -341,27 +342,6 @@
             border-color: #f57c00;
         }
 
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
-
-            header {
-                width: 100%;
-                position: static;
-            }
-
-            .game-board {
-                width: 100%;
-                max-width: 100%;
-                max-height: calc(100vh - 100px);
-            }
-
-            .cell {
-                width: clamp(25px, 8vw, 50px);
-                height: clamp(25px, 8vw, 50px);
-            }
-        }
     </style>
 </head>
 <body>
@@ -720,6 +700,7 @@
             renderBoard() {
                 this.gameBoard.innerHTML = '';
                 this.gameBoard.style.gridTemplateColumns = `repeat(${this.gridSize}, 1fr)`;
+                this.gameBoard.style.gridTemplateRows = `repeat(${this.gridSize}, 1fr)`;
                 
                 for (let row = 0; row < this.gridSize; row++) {
                     for (let col = 0; col < this.gridSize; col++) {
