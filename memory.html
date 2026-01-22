@@ -19,7 +19,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: clamp(10px, 2vw, 30px);
+            --layout-pad: clamp(10px, 2vw, 30px);
+            --layout-gap: clamp(15px, 2vw, 25px);
+            --layout-sidebar: clamp(220px, 28vw, 320px);
+            padding: var(--layout-pad);
             color: #333;
             overflow-x: hidden;
         }
@@ -28,7 +31,7 @@
             max-width: min(1400px, 95vw);
             width: 100%;
             display: flex;
-            gap: clamp(15px, 2vw, 25px);
+            gap: var(--layout-gap);
             align-items: flex-start;
         }
 
@@ -40,7 +43,7 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             text-align: center;
             flex: 0 0 auto;
-            width: clamp(220px, 28vw, 320px);
+            width: var(--layout-sidebar);
             position: sticky;
             top: 20px;
             align-self: flex-start;
@@ -168,6 +171,11 @@
         .game-board[data-cards="16"] { grid-template-columns: repeat(4, 1fr); }
         .game-board[data-cards="20"] { grid-template-columns: repeat(5, 1fr); }
         .game-board[data-cards="24"] { grid-template-columns: repeat(6, 1fr); }
+
+        .game-board[data-cards="12"] { --board-ar: 1.3333; }
+        .game-board[data-cards="16"] { --board-ar: 1; }
+        .game-board[data-cards="20"] { --board-ar: 1.25; }
+        .game-board[data-cards="24"] { --board-ar: 1.5; }
 
 
         .card {
@@ -413,6 +421,74 @@
 
         .bird-emoji {
             font-size: 1em;
+        }
+
+        /* Unified large-screen scaling */
+        @media (min-width: 1100px) {
+            body {
+                height: 100vh;
+                overflow: hidden;
+            }
+
+            .container {
+                max-width: 98vw;
+                height: 100%;
+                align-items: stretch;
+            }
+
+            header {
+                position: static;
+            }
+
+            .game-board {
+                width: min(
+                    calc(100vw - (2 * var(--layout-pad)) - var(--layout-sidebar) - var(--layout-gap)),
+                    calc((100vh - (2 * var(--layout-pad))) * var(--board-ar, 1))
+                );
+                height: min(
+                    calc(100vh - (2 * var(--layout-pad))),
+                    calc((100vw - (2 * var(--layout-pad)) - var(--layout-sidebar) - var(--layout-gap)) / var(--board-ar, 1))
+                );
+                max-width: 100%;
+                max-height: 100%;
+                margin: 0;
+                grid-auto-rows: 1fr;
+            }
+        }
+
+        /* Unified fullscreen scaling */
+        :fullscreen body,
+        :-webkit-full-screen body {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        :fullscreen .container,
+        :-webkit-full-screen .container {
+            max-width: 98vw;
+            height: 100%;
+            align-items: stretch;
+        }
+
+        :fullscreen header,
+        :-webkit-full-screen header {
+            position: static;
+        }
+
+        :fullscreen .game-board,
+        :-webkit-full-screen .game-board {
+            width: min(
+                calc(100vw - (2 * var(--layout-pad)) - var(--layout-sidebar) - var(--layout-gap)),
+                calc((100vh - (2 * var(--layout-pad))) * var(--board-ar, 1))
+            );
+            height: min(
+                calc(100vh - (2 * var(--layout-pad))),
+                calc((100vw - (2 * var(--layout-pad)) - var(--layout-sidebar) - var(--layout-gap)) / var(--board-ar, 1))
+            );
+            max-width: 100%;
+            max-height: 100%;
+            margin: 0;
+            grid-auto-rows: 1fr;
         }
 
     </style>
