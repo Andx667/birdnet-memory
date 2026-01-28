@@ -338,10 +338,10 @@
         :-webkit-full-screen .game-board {
             width: min(
                 calc(100vw - (2 * var(--layout-pad)) - var(--layout-sidebar) - var(--layout-gap)),
-                calc((100vh - (2 * var(--layout-pad))) * var(--board-ar))
+                calc((100dvh - (2 * var(--layout-pad))) * var(--board-ar))
             );
             height: min(
-                calc(100vh - (2 * var(--layout-pad))),
+                calc(100dvh - (2 * var(--layout-pad))),
                 calc((100vw - (2 * var(--layout-pad)) - var(--layout-sidebar) - var(--layout-gap)) / var(--board-ar))
             );
             max-width: 100%;
