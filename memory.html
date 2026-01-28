@@ -1042,7 +1042,7 @@
             }
 
             updateDisplay() {
-                if (this.gameMode === 'single') {
+                if (this.gameMode === 'single' || this.gameMode === 'nameimage') {
                     this.movesDisplay.textContent = this.moves;
                     this.timerDisplay.textContent = this.formatTime(this.timer);
                     this.matchesDisplay.textContent = `${this.matchedPairs}/${this.gridSize / 2}`;
@@ -1050,7 +1050,6 @@
                     this.currentTurnDisplay.textContent = `Player ${this.currentPlayer}'s Turn`;
                     this.player1ScoreDisplay.querySelector('.player-value').textContent = this.player1Score;
                     this.player2ScoreDisplay.querySelector('.player-value').textContent = this.player2Score;
-                    
                     // Highlight current player with CSS class
                     if (this.currentPlayer === 1) {
                         this.player1ScoreDisplay.classList.add('active');
